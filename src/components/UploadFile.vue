@@ -1,35 +1,50 @@
 <script setup>
 import { ref } from 'vue'
+import axios from 'axios'
 
 const fileName = ref(null)
+const fileData = ref(null)
 const isLoading = ref(false)
 
 function handleFileUpload(event) {
   const file = event.target.files[0]
   if (file) {
     fileName.value = file.name
+    fileData.value = file
   }
 }
 
 function clearFile() {
   fileName.value = null
+  fileData.value = null
 }
 
 async function handleAnalyze() {
-  if (!fileName.value) {
-    alert('⚠️ Silakan pilih file dulu sebelum upload & analyze!')
+  if (!fileData.value) {
+    alert('⚠️ Silakan pilih file dulu sebelum upload!')
     return
   }
 
-  // set loading
   isLoading.value = true
 
-  // simulasi proses 3 detik (misalnya upload/analisis ke server)
-  await new Promise((resolve) => setTimeout(resolve, 3000))
+  try {
+    const formData = new FormData()
+    formData.append('file', fileData.value)
 
-  // selesai proses
-  isLoading.value = false
-  alert(`✅ File "${fileName.value}" berhasil diproses!`)
+    const response = await axios.post('http://localhost:8000/rekomendasi/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    alert(response.data.message || '✅ File berhasil dikirim dan diproses di server!')
+
+    // opsional: reset file setelah dikirim
+    fileName.value = null
+    fileData.value = null
+  } catch (error) {
+    console.error('Upload gagal:', error)
+    alert('❌ Gagal mengirim file ke server!')
+  } finally {
+    isLoading.value = false
+  }
 }
 </script>
 

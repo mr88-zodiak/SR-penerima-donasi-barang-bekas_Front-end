@@ -3,23 +3,17 @@
 import { inject, onMounted, provide } from 'vue'
 import { useDataPenerima } from '@/store/dataPenerima'
 import Search_action from '@/components/Search_action.vue'
-// import UploadFile from '@/components/UploadFile.vue'
+
 const penerima = useDataPenerima()
 
-onMounted(() => {
-  penerima.dataTable
+// Ambil data saat komponen mount
+onMounted(async () => {
+  await penerima.getData()
 })
 
-const cekLayak = (item) => {
-  if (item.layak == true) {
-    return 'Layak'
-  } else {
-    return 'Tidak'
-  }
-}
-const colorKelayakan = (item) => {
-  return item.layak ? 'text-green-500' : 'text-red-500'
-}
+const cekLayak = (item) => (item.layak ? 'tidak' : 'layak')
+const colorKelayakan = (item) => (item.layak ? 'text-red-500' : 'text-green-500')
+
 const isdarkMode = inject('isdarkMode')
 provide('data', penerima)
 </script>
