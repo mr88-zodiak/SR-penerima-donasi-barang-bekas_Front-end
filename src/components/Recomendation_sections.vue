@@ -1,27 +1,21 @@
 <script setup>
-import { provide, ref } from 'vue'
+import { useDataKlasifikasi } from '@/store/dataKlasifikasi'
+import { onMounted, onUnmounted } from 'vue'
 
-const RekomendasiPenerima = ref([
-  {
-    id: 1,
-    name: 'Penerima A',
-    description: 'Deskripsi penerima A',
-    image: 'https://via.placeholder.com/150',
-  },
-  {
-    id: 2,
-    name: 'Penerima B',
-    description: 'Deskripsi penerima B',
-    image: 'https://via.placeholder.com/150',
-  },
-  {
-    id: 3,
-    name: 'Penerima C',
-    description: 'Deskripsi penerima C',
-    image: 'https://via.placeholder.com/150',
-  },
-])
-provide('RekomendasiPenerima', RekomendasiPenerima)
+const data = useDataKlasifikasi()
+
+let interval
+onMounted(async () => {
+  data.getDataD()
+  interval = setInterval(() => {
+    data.getDataD()
+  }, 3000)
+})
+onUnmounted(() => {
+  if (interval) {
+    clearInterval(interval)
+  }
+})
 </script>
 
 <template>
@@ -29,21 +23,28 @@ provide('RekomendasiPenerima', RekomendasiPenerima)
     <div class="flex justify-center items-center">
       <h1 class="text-2xl font-bold text-white">Rekomendasi</h1>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-      <slot />
-    </div>
-    <div
-      class="flex flex-col justify-center mt-4"
-      v-for="item in RekomendasiPenerima"
-      :key="item.id"
-    >
-      <router-link
-        :to="`/donatur/donasi/${item.id}/checkout`"
-        class="px-4 cursor-pointer py-2 text-left border-2 border-gray-500 bg-transparent hover:bg-gray-500 text-white rounded transition-colors duration-300"
-        @click="$emit('loadMore')"
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+      <div
+        v-for="item in data.klasifikasiData"
+        :key="item.id"
+        @click="item.isClick = !item.isClick"
+        class="deskripsi p-5 rounded-lg shadow-lg cursor-pointer transition-all duration-300"
+        :class="item.isClick ? 'shadow-green-500 shadow-md' : 'shadow-blue-500'"
       >
-        {{ item.name }}
-      </router-link>
+        <p class="text-gray-300 mb-2"><strong>Nama:</strong> {{ item.name }}</p>
+        <p class="text-gray-300 mb-2">
+          <strong>Jenis Kebutuhan:</strong> {{ item.jenisKebutuhan }}
+        </p>
+        <div class="mt-4 text-center">
+          <router-link
+            :to="`/DonasiKita/donatur/donate/${item.id}/checkout`"
+            class="bg-yellow-400 text-black px-4 py-2 rounded hover:bg-yellow-500 transition-colors duration-300 cursor-pointer"
+          >
+            Donate Now
+          </router-link>
+        </div>
+      </div>
     </div>
   </div>
 </template>

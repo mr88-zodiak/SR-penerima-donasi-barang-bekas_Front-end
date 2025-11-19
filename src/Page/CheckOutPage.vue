@@ -1,21 +1,22 @@
 <script setup>
-import { inject, ref, computed } from 'vue'
-import { useRoute } from 'vue-router'
+// import { useRoute } from 'vue-router'
 import { ArrowLeftIcon } from '@heroicons/vue/24/solid'
+import FormData from '@/views/Donatur/FormData.vue'
+import { ref } from 'vue'
 
-const isdarkMode = ref(localStorage.getItem('DarkMode') === 'true')
+const isdarkMode = ref(true)
 
 // inject array dari parent
-const RekomendasiPenerima = inject('RekomendasiPenerima', ref([]))
+// const RekomendasiPenerima = inject('RekomendasiPenerima', ref([]))
 
 // ambil id dari route (misal: /donatur/donasi/2/checkout)
-const route = useRoute()
-const penerimaId = Number(route.params.id)
+// const route = useRoute()
+// const penerimaId = Number(route.params.id)
 
 // cari data sesuai id
-const dataDeskripsi = computed(() =>
-  RekomendasiPenerima.value.find((item) => item.id === penerimaId),
-)
+// const dataDeskripsi = computed(() =>
+//   RekomendasiPenerima.value.find((item) => item.id === penerimaId),
+// )
 </script>
 
 <template>
@@ -29,33 +30,22 @@ const dataDeskripsi = computed(() =>
         :class="isdarkMode ? 'dark:bg-gray-800 dark:text-white' : 'bg-white text-black'"
       >
         <div class="flex items-center space-x-10">
-          <router-link to="/donatur/home"
+          <router-link to="/DonasiKita/donatur/dashboard"
             ><ArrowLeftIcon class="cursor-pointer w-6 h-6"
           /></router-link>
-          <h1 class="text-2xl font-bold">Checkout Page</h1>
         </div>
 
         <!-- tampilkan description sesuai id -->
-        <p class="dark:text-white">
-          {{ dataDeskripsi?.description || 'Deskripsi tidak tersedia' }}
-        </p>
+        <h1
+          class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400"
+        >
+          Checkout Page
+        </h1>
       </div>
     </div>
 
-    <div class="content relative top-40 p-4">
-      <p class="text-lg font-semibold text-white">Order Summary</p>
-      <ul class="list-disc pl-5 text-white">
-        <li>Item 1: $10.00</li>
-        <li>Item 2: $15.00</li>
-        <li>Item 3: $20.00</li>
-      </ul>
-      <p class="mt-2 font-bold">Total: $45.00</p>
-      <button
-        class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
-        @click="$emit('proceedToPayment')"
-      >
-        Proceed to Payment
-      </button>
+    <div class="content relative top-40 p-5 flex items-center flex-col">
+      <FormData />
     </div>
   </div>
 </template>

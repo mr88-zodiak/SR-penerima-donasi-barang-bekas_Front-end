@@ -1,9 +1,9 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup>
-import { inject } from 'vue'
+import { useTheme } from '@/store/themeStore'
 
 // import { reactive } from 'vue'
-// eslint-disable-next-line no-unused-vars
+
 const props = defineProps({
   isOpen: {
     type: Boolean,
@@ -13,8 +13,21 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  router_link: {
+    type: String,
+    default: '/DonasiKita/login',
+  },
+  token: {
+    type: String,
+    default: 'token',
+  },
 })
-const isdarkMode = inject('isdarkMode')
+
+const removeToken = () => {
+  localStorage.removeItem(props.token)
+}
+const emit = defineEmits(['close'])
+const theme = useTheme()
 // const localMenu = reactive(props.isOpen.map((item) => ({ ...item })))
 </script>
 
@@ -29,12 +42,13 @@ const isdarkMode = inject('isdarkMode')
       <div class="relative p-4 w-full max-w-md max-h-full">
         <div
           class="relative rounded-lg shadow-sm"
-          :class="isdarkMode ? 'dark:bg-gray-700' : 'bg-white'"
+          :class="theme.isdarkMode ? 'dark:bg-gray-700' : 'bg-white'"
         >
           <button
             type="button"
-            class="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+            class="absolute cursor-pointer top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
             data-modal-hide="popup-modal"
+            @click="$emit('close')"
           >
             <svg
               class="w-3 h-3"
@@ -56,7 +70,7 @@ const isdarkMode = inject('isdarkMode')
           <div class="p-4 md:p-5 text-center">
             <svg
               class="mx-auto mb-4 w-12 h-12"
-              :class="isdarkMode ? 'dark:text-gray-200' : 'text-gray-400'"
+              :class="theme.isdarkMode ? 'dark:text-gray-200' : 'text-gray-400'"
               aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -72,25 +86,27 @@ const isdarkMode = inject('isdarkMode')
             </svg>
             <h3
               class="mb-5 text-lg font-normal"
-              :class="isdarkMode ? 'dark:text-gray-400' : 'text-gray-500'"
+              :class="theme.isdarkMode ? 'dark:text-gray-400' : 'text-gray-500'"
             >
               yakin mau logout sekarang?
             </h3>
             <router-link
-              to="/admin/login"
+              :to="router_link"
               data-modal-hide="popup-modal"
               type="button"
+              @click="removeToken"
               class="cursor-pointer text-white hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center"
-              :class="isdarkMode ? 'dark:focus:ring-red-800' : 'bg-red-600'"
+              :class="theme.isdarkMode ? 'dark:focus:ring-red-800' : 'bg-red-600'"
             >
               yakin
             </router-link>
             <button
               data-modal-hide="popup-modal"
+              @click="emit('close')"
               type="button"
               class="cursor-pointer py-2.5 px-5 ms-3 text-sm font-medium focus:outline-none rounded-lg border focus:z-10 focus:ring-4"
               :class="
-                isdarkMode
+                theme.isdarkMode
                   ? 'dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700'
                   : 'text-gray-900 bg-white border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:ring-gray-100'
               "
