@@ -6,6 +6,7 @@ export const useBarang = defineStore('barang', () => {
   const tableDataBarang = reactive([])
   const tableDataBarangP = reactive([])
   const tableDataBarangPR = reactive([])
+  const tablePengajuanBarang = reactive([])
   const seriesBar = ref([])
   const categoriesBar = ref([])
   const seriesPie = ref([])
@@ -169,8 +170,51 @@ export const useBarang = defineStore('barang', () => {
     }
   }
 
+  const pengajuanBarang = async (formdata) => {
+    try {
+      const response = await axios.post(
+        'http://localhost:5000/pengajuan/api/post/pengajuan_barang',
+        formdata,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token_penerima')}`,
+          },
+        },
+      )
+      alert(response.data.message)
+    } catch (e) {
+      console.log(e.response)
+      alert(e.response.data.error)
+    }
+  }
+  const getDataPengajuanBarang = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/pengajuan/api/get/pengajuan_barang', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      })
+      // console.log(response.data.pengajuan_barang)
+      const data = response.data.pengajuan_barang.map((item) => ({
+        id: item.id,
+        penerimaName: item.penerima_name,
+        jenisBarang: item.jenis_barang,
+        namaBarang: item.nama_barang,
+        status: item.status,
+        tanggalPengajuan: item.tanggal_pengajuan?.split('T')[0] || '-',
+      }))
+      tablePengajuanBarang.splice(0, tablePengajuanBarang.length, ...data)
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
   return {
     totalDataBarang,
+    getDataPengajuanBarang,
+    tablePengajuanBarang,
+    pengajuanBarang,
     totalDataBarangP,
     getDataBarangP,
     fetchChartData,

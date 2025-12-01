@@ -23,28 +23,51 @@ import {
   Heart,
   Package,
 } from 'lucide-vue-next'
+import socket from '@/plugins/socket'
+import { useDonatur } from '@/store/donatur'
+import { usePenerima } from '@/store/penerima'
+import { useBarang } from '@/store/barang'
+import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
+const donatur = useDonatur()
+const penerima = usePenerima()
+const barang = useBarang()
 
-import { onMounted, reactive, ref } from 'vue'
+onMounted(async () => {
+  await penerima.getDataPenerima()
+  await donatur.getDataDonatur()
+  await barang.getDataBarang()
+  socket.on('data_update', async () => {
+    await penerima.getDataPenerima()
+    await donatur.getDataDonatur()
+    await barang.getDataBarang()
 
-const stats = reactive([
+    // stats.value.forEach((stat) => {
+    //   stat.current = stat.value // update langsung
+    // })
+  })
+})
+onUnmounted(() => {
+  socket.off('data_update')
+})
+const stats = computed(() => [
   {
     id: 1,
     icon: CubeIcon,
-    value: 2543,
+    value: barang.totalDataBarang,
     label: 'Barang Terkumpul',
     current: 0,
   },
   {
     id: 2,
     icon: UsersIcon,
-    value: 1234,
+    value: donatur.totalData,
     label: 'Donatur',
     current: 0,
   },
   {
     id: 3,
     icon: HeartIcon,
-    value: 987,
+    value: penerima.totalDataPenerima,
     label: 'Penerima Manfaat',
     current: 0,
   },
@@ -132,7 +155,7 @@ onMounted(() => {
     (entries, observer) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          stats.forEach((stat) => {
+          stats.value.forEach((stat) => {
             if (stat.current === 0) {
               animateValue(stat, 2000)
             }

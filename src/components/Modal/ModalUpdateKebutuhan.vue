@@ -58,7 +58,7 @@ const handleSubmit = async () => {
 
   try {
     const respon = await axios.put(
-      `http://localhost:5000/penerima/api/put/personalDataDiri/${props.id}`,
+      `http://localhost:5000/user/api/put/personalDataDiri/${props.id}`,
       formData.value,
       {
         headers: {

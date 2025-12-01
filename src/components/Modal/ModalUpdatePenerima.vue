@@ -33,7 +33,7 @@ const theme = useTheme()
 const UpdatePenerima = async () => {
   try {
     const respon = await axios.put(
-      `http://localhost:5000/penerima/api/put/update/${props.id}`,
+      `http://localhost:5000/user/api/put/update/${props.id}`,
       formData.value,
       {
         headers: {

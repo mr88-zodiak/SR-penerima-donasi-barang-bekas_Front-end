@@ -221,7 +221,7 @@ export const useDataDonasi = defineStore('dataDonasi', () => {
           Authorization: `Bearer ${localStorage.getItem('token_penerima')}`,
         },
       })
-      console.log(response.data.donasi)
+      // console.log(response.data.donasi)
       const data = response.data.donasi
         .map((item) => {
           return {

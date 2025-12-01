@@ -167,12 +167,17 @@
       <div v-if="activeTab === 'donasi'">
         <div class="flex items-center justify-between mb-8">
           <h1 class="text-3xl font-bold">Daftar Donasi</h1>
-          <!-- <button
-            class="bg-emerald-600 cursor-pointer hover:bg-emerald-700 text-white px-6 py-2 rounded-lg font-medium transition-all"
+          <button
+            @click="isOpenModalAjuanBarang = true"
+            class="bg-blue-600 cursor-pointer hover:bg-emerald-700 text-white px-6 py-2 rounded-lg font-medium transition-all"
           >
-            Donasi Baru
-          </button> -->
+            Pengajuan barang
+          </button>
         </div>
+        <ModalPengajuanBarang
+          :isOpen="isOpenModalAjuanBarang"
+          @close="isOpenModalAjuanBarang = false"
+        />
 
         <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
           <div class="overflow-x-auto">
@@ -228,6 +233,7 @@
 <script setup>
 import ModalLogout from '@/components/Modal/ModalLogout.vue'
 import socket from '@/plugins/socket'
+import ModalPengajuanBarang from '@/components/Modal/ModalPengajuanBarang.vue'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import {
   Home,
@@ -247,6 +253,7 @@ import { useBarang } from '@/store/barang'
 import { useDonatur } from '@/store/donatur'
 import { useDataDonasi } from '@/store/dataDonasi'
 const isOpenModal = ref(false)
+const isOpenModalAjuanBarang = ref(false)
 const activeTab = ref('home')
 
 const cekKategoriIcon = (item) => {

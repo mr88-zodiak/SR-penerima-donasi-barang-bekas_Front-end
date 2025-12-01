@@ -15,7 +15,7 @@ export const useAuth = defineStore('auth', () => {
   const Login = async () => {
     try {
       const respon = await axios.post(
-        'http://localhost:5000/penerima/api/post/login',
+        'http://localhost:5000/user/api/post/login',
         formLogin.value,
         {
           headers: {
@@ -66,7 +66,7 @@ export const useAuth = defineStore('auth', () => {
   const Register = async () => {
     try {
       const respon = await axios.post(
-        'http://localhost:5000/penerima/api/post/daftar',
+        'http://localhost:5000/user/api/post/daftar',
         formDataRegister.value,
         {
           headers: {
@@ -108,7 +108,7 @@ export const useAuth = defineStore('auth', () => {
   const personalRegister = async () => {
     try {
       const respon = await axios.post(
-        'http://localhost:5000/penerima/api/post/personalData',
+        'http://localhost:5000/user/api/post/personalData',
         formDataPersonalRegister.value,
         {
           headers: {
@@ -136,7 +136,7 @@ export const useAuth = defineStore('auth', () => {
   const getUsername = ref('')
   const getUser = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/penerima/api/get/username', {
+      const response = await axios.get('http://localhost:5000/user/api/get/username', {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token_donatur')}`,
         },

@@ -11,12 +11,12 @@ export const usePenerima = defineStore('penerima', () => {
   const getDataPenerima = async () => {
     try {
       const token = localStorage.getItem('token')
-      const response = await axios.get('http://localhost:5000/penerima/api/get/account/penerima', {
+      const response = await axios.get('http://localhost:5000/user/api/get/account/penerima', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      console.log(response.data.data)
+      // console.log(response.data.data)
       const data = response.data.data
         .map((item) => ({
           no: item.id,
@@ -49,7 +49,7 @@ export const usePenerima = defineStore('penerima', () => {
 
   const getDataPersonal = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/penerima/api/get/data/personal', {
+      const response = await axios.get('http://localhost:5000/user/api/get/data/personal', {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
@@ -77,7 +77,7 @@ export const usePenerima = defineStore('penerima', () => {
   const getDataInfoDonasi = async () => {
     try {
       const token = localStorage.getItem('token')
-      const response = await axios.get('http://localhost:5000/penerima/api/get/informasiDonasi', {
+      const response = await axios.get('http://localhost:5000/user/api/get/informasiDonasi', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -105,7 +105,7 @@ export const usePenerima = defineStore('penerima', () => {
   const updateDataPersonal = async () => {
     try {
       const response = await axios.put(
-        'http://localhost:5000/penerima/api/update/data/personal',
+        'http://localhost:5000/user/api/update/data/personal',
         formDataDiri,
         {
           headers: {
@@ -135,7 +135,7 @@ export const usePenerima = defineStore('penerima', () => {
     else isRefreshing.value = true
 
     try {
-      const response = await axios.get('http://localhost:5000/penerima/api/get/role/user', {
+      const response = await axios.get('http://localhost:5000/user/api/get/role/user', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       })
       // console.log(response.data.data)
@@ -167,15 +167,11 @@ export const usePenerima = defineStore('penerima', () => {
 
   const approved = async (id) => {
     try {
-      const response = await axios.put(
-        `http://localhost:5000/penerima/api/user/approved/${id}`,
-        null,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
+      const response = await axios.put(`http://localhost:5000/user/api/user/approved/${id}`, null, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
-      )
+      })
       console.log(response.data.message)
     } catch (e) {
       console.log(e)
@@ -183,15 +179,11 @@ export const usePenerima = defineStore('penerima', () => {
   }
   const rejected = async (id) => {
     try {
-      const response = await axios.put(
-        `http://localhost:5000/penerima/api/user/rejected/${id}`,
-        null,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
+      const response = await axios.put(`http://localhost:5000/user/api/user/rejected/${id}`, null, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
-      )
+      })
       console.log(response.data.message)
     } catch (e) {
       console.log(e)

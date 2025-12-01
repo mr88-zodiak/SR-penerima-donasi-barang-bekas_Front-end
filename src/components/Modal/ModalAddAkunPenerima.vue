@@ -32,15 +32,11 @@ const disableButton = computed(
 const emits = defineEmits(['close', 'next'])
 const registerPost = async () => {
   try {
-    const respon = await axios.post(
-      `http://localhost:5000/penerima/api/post/daftar`,
-      formData.value,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
+    const respon = await axios.post(`http://localhost:5000/user/api/post/daftar`, formData.value, {
+      headers: {
+        'Content-Type': 'application/json',
       },
-    )
+    })
 
     alert(respon.data.message)
     emits('next')

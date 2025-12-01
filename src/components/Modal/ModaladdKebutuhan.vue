@@ -66,7 +66,7 @@ const handleSubmit = async () => {
 
   try {
     const respon = await axios.post(
-      'http://localhost:5000/penerima/api/post/modal/personal',
+      'http://localhost:5000/user/api/post/modal/personal',
       formData.value,
     )
     alert(respon.data.message)

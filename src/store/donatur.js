@@ -9,7 +9,7 @@ export const useDonatur = defineStore('donatur', () => {
   const getDataDonatur = async () => {
     try {
       const token = localStorage.getItem('token')
-      const response = await axios.get('http://localhost:5000/penerima/api/get/account/donatur', {
+      const response = await axios.get('http://localhost:5000/user/api/get/account/donatur', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -37,7 +37,7 @@ export const useDonatur = defineStore('donatur', () => {
   const getDataDonaturP = async () => {
     try {
       const token = localStorage.getItem('token_penerima')
-      const response = await axios.get('http://localhost:5000/penerima/api/get/account/donatur', {
+      const response = await axios.get('http://localhost:5000/user/api/get/account/donatur', {
         headers: {
           Authorization: `Bearer ${token}`,
         },

@@ -56,5 +56,5 @@ app.config.globalProperties.$socket = socket
 app.mount('#app')
 AOS.init({
   duration: 800,
-  once: false,
+  once: true,
 })
