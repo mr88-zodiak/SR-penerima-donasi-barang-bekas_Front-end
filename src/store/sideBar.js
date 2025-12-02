@@ -8,6 +8,8 @@ import {
   ArchiveBoxIcon as ArchiveBoxIconOutline,
   ClockIcon as ClockIconOutline,
   KeyIcon as KeyIconOutline,
+  PhotoIcon as PhotoIconOutline,
+  CheckCircleIcon as CheckCircleIconOutline,
   // HandRaisedIcon,
 } from '@heroicons/vue/24/outline'
 
@@ -19,6 +21,8 @@ import {
   ArchiveBoxIcon as ArchiveBoxIconSolid,
   ClockIcon as ClockIconSolid,
   KeyIcon as KeyIconSolid,
+  PhotoIcon as PhotoIconSolid,
+  CheckCircleIcon as CheckCircleIconSolid,
 } from '@heroicons/vue/24/solid'
 export const useSideBars = defineStore('dataSideBars', () => {
   const itemMenu = reactive([
@@ -89,6 +93,22 @@ export const useSideBars = defineStore('dataSideBars', () => {
       icon: KeyIconOutline,
       iconActive: KeyIconSolid,
       link: '/auth',
+      active: false,
+    },
+    {
+      id: 9,
+      name: 'Dokumentasi',
+      icon: PhotoIconOutline,
+      iconActive: PhotoIconSolid,
+      link: '/dokumentasi',
+      active: false,
+    },
+    {
+      id: 10,
+      name: 'Verifikasi Donatur',
+      icon: CheckCircleIconOutline,
+      iconActive: CheckCircleIconSolid,
+      link: '/verifikasi-donatur',
       active: false,
     },
   ])

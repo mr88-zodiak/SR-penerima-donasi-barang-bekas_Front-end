@@ -39,7 +39,7 @@ const toggleDarkMode = () => {
 
     <!-- Navbar -->
     <div
-      class="fixed top-0 left-0 w-full z-50 shadow-md p-6 transition-all duration-300 ease-in-out"
+      class="fixed top-0 left-0 w-full z-0 shadow-md p-6 transition-all duration-300 ease-in-out"
       :class="theme.isdarkMode ? 'dark:bg-gray-800 dark:text-white' : 'bg-white text-black'"
     >
       <div class="flex items-center justify-between">

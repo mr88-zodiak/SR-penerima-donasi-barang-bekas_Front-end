@@ -275,6 +275,18 @@ const routes = [
         meta: { title: 'Auth', requiresAuth: true, role: 'admin' },
         component: () => import('../Page/Authorization.vue'),
       },
+      {
+        path: 'dokumentasi',
+        name: 'dokumentasi',
+        meta: { title: 'Dokumentasi', requiresAuth: true, role: 'admin' },
+        component: () => import('../Page/Dokumentasi.vue'),
+      },
+      {
+        path: 'verifikasi-donatur',
+        name: 'verifikasi pengajuan',
+        meta: { title: 'Verifikasi Pengajuan', requiresAuth: true, role: 'admin' },
+        component: () => import('../Page/VerifikasiPengajuan.vue'),
+      },
     ],
   },
   // ... (Rute Login, Register, Donatur, Landing Page, Penerima, Not Found)
