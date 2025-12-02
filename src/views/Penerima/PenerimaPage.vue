@@ -30,7 +30,19 @@
               ]"
             >
               <Heart :size="20" />
-              <span class="font-medium">Donasi</span>
+              <span class="font-medium">Pengajuan</span>
+            </button>
+            <button
+              @click="activeTab = 'pengajuan'"
+              :class="[
+                'flex cursor-pointer items-center space-x-2 px-4 py-2 rounded-lg transition-all',
+                activeTab === 'pengajuan'
+                  ? 'bg-emerald-600 text-white'
+                  : 'text-gray-300 hover:bg-gray-700 hover:text-white',
+              ]"
+            >
+              <Send :size="20" />
+              <span class="font-medium">Pengajuan</span>
             </button>
           </div>
 
@@ -167,12 +179,12 @@
       <div v-if="activeTab === 'donasi'">
         <div class="flex items-center justify-between mb-8">
           <h1 class="text-3xl font-bold">Daftar Donasi</h1>
-          <button
+          <!-- <button
             @click="isOpenModalAjuanBarang = true"
             class="bg-blue-600 cursor-pointer hover:bg-emerald-700 text-white px-6 py-2 rounded-lg font-medium transition-all"
           >
             Pengajuan barang
-          </button>
+          </button> -->
         </div>
         <ModalPengajuanBarang
           :isOpen="isOpenModalAjuanBarang"
@@ -209,11 +221,20 @@
                   <td class="px-6 py-4 text-gray-400">{{ donation.jumlah }}</td>
                   <td class="px-6 py-4 text-gray-400">{{ donation.kondisi }}</td>
                   <td class="px-6 py-4 text-gray-400">{{ donation.tanggalDonasi }}</td>
-                  <td class="px-6 py-4 text-gray-400">{{ donation.status }}</td>
                   <td
-                    class="px-6 py-4 text-green-400"
+                    class="px-6 py-4 text-gray-400"
+                    :class="{
+                      'text-green-400': donation.status === 'approved',
+                      'text-amber-400': donation.status === 'pending',
+                      'text-red-400': donation.status === 'rejected',
+                    }"
+                  >
+                    {{ donation.status }}
+                  </td>
+                  <td
+                    class="px-6 py-4"
                     :class="
-                      donation.statusPengiriman !== 'selesai' ? 'text-amber-300' : 'text-green-400'
+                      donation.statusPengiriman !== 'Selesai' ? 'text-amber-300' : 'text-green-400'
                     "
                   >
                     {{ donation.statusPengiriman }}
@@ -222,6 +243,162 @@
               </tbody>
             </table>
           </div>
+        </div>
+      </div>
+      <div v-if="activeTab === 'pengajuan'" class="min-h-screen bg-gray-900 text-gray-100 p-6">
+        <div class="max-w-7xl mx-auto">
+          <!-- Header -->
+          <div class="flex justify-between items-center mb-8">
+            <div>
+              <h1 class="text-3xl font-bold text-white mb-2">Pengajuan Barang Donasi</h1>
+              <p class="text-gray-400">Kelola pengajuan barang donasi Anda</p>
+            </div>
+
+            <button
+              @click="showModal = true"
+              class="flex cursor-pointer items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-lg"
+            >
+              <Plus size="20" />
+              Ajukan Barang
+            </button>
+          </div>
+
+          <!-- Table -->
+          <div class="bg-gray-800 rounded-lg shadow-xl overflow-hidden border border-gray-700">
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead class="bg-gray-900">
+                  <tr>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">ID</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">Gambar</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">
+                      Nama Barang
+                    </th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">
+                      Tanggal Pengajuan
+                    </th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">Status</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">
+                      Tanggal Approve
+                    </th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">
+                      Tanggal Reject
+                    </th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">
+                      Pesan Penolakan
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody class="divide-y divide-gray-700">
+                  <tr
+                    v-for="request in requests"
+                    :key="request.id"
+                    class="hover:bg-gray-750 transition-colors"
+                  >
+                    <td class="px-6 py-4 text-sm font-medium text-gray-300">{{ request.id }}</td>
+
+                    <td class="px-6 py-4">
+                      <img
+                        :src="request.gambarBarang"
+                        :alt="request.namaBarang"
+                        class="w-16 h-16 object-cover rounded-lg border border-gray-600"
+                      />
+                    </td>
+
+                    <td class="px-6 py-4 text-sm font-medium text-gray-200">
+                      {{ request.namaBarang }}
+                    </td>
+
+                    <td class="px-6 py-4 text-sm text-gray-400">
+                      {{ request.tanggalPengajuan }}
+                    </td>
+
+                    <td class="px-6 py-4">
+                      <span
+                        class="flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium"
+                        :class="getStatusBadge(request.status).class"
+                      >
+                        <component :is="getStatusBadge(request.status).icon" size="16" />
+                        {{ getStatusBadge(request.status).label }}
+                      </span>
+                    </td>
+
+                    <td class="px-6 py-4 text-sm text-gray-400">
+                      {{ request.tanggalApprove || '-' }}
+                    </td>
+
+                    <td class="px-6 py-4 text-sm text-gray-400">
+                      {{ request.tanggalReject || '-' }}
+                    </td>
+
+                    <td class="px-6 py-4 text-sm text-gray-400 max-w-xs">
+                      <span v-if="request.pesanPenolakan" class="text-red-400">
+                        {{ request.pesanPenolakan }}
+                      </span>
+                      <span v-else>-</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Modal -->
+          <div
+            v-if="showModal"
+            class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50"
+          >
+            <div class="bg-gray-800 rounded-lg shadow-2xl w-full max-w-md border border-gray-700">
+              <div class="p-6">
+                <h2 class="text-2xl font-bold text-white mb-6">Ajukan Barang Baru</h2>
+
+                <div class="mb-4">
+                  <label class="block text-sm font-medium text-gray-300 mb-2">Nama Barang</label>
+                  <input
+                    type="text"
+                    v-model="formData.namaBarang"
+                    class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Contoh: Beras 10kg"
+                  />
+                </div>
+
+                <div class="mb-6">
+                  <label class="block text-sm font-medium text-gray-300 mb-2">Upload Gambar</label>
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/jpg"
+                    @change="handleImageUpload"
+                    class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white file:cursor-pointer hover:file:bg-blue-700"
+                  />
+
+                  <div v-if="formData.gambarBarang" class="mt-3">
+                    <img
+                      :src="formData.gambarBarang"
+                      alt="Preview"
+                      class="w-32 h-32 object-cover rounded-lg border border-gray-600"
+                    />
+                  </div>
+                </div>
+
+                <div class="flex gap-3">
+                  <button
+                    @click="showModal = false"
+                    class="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    @click="handleSubmit"
+                    class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                  >
+                    Ajukan
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- End Modal -->
         </div>
       </div>
     </main>
@@ -237,6 +414,7 @@ import ModalPengajuanBarang from '@/components/Modal/ModalPengajuanBarang.vue'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import {
   Home,
+  Send,
   Heart,
   Package,
   Users,
@@ -248,10 +426,95 @@ import {
   Sofa,
   Laptop,
   ChefHat,
+  XCircle,
 } from 'lucide-vue-next'
 import { useBarang } from '@/store/barang'
 import { useDonatur } from '@/store/donatur'
 import { useDataDonasi } from '@/store/dataDonasi'
+const requests = ref([
+  {
+    id: 'REQ001',
+    namaBarang: 'Beras 10kg',
+    gambarBarang:
+      'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=100&h=100&fit=crop',
+    tanggalPengajuan: '2024-11-15',
+    tanggalApprove: '2024-11-16',
+    tanggalReject: null,
+    status: 'approved',
+    pesanPenolakan: null,
+  },
+  {
+    id: 'REQ002',
+    namaBarang: 'Minyak Goreng 2L',
+    gambarBarang:
+      'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=100&h=100&fit=crop',
+    tanggalPengajuan: '2024-11-18',
+    tanggalApprove: null,
+    tanggalReject: null,
+    status: 'pending',
+    pesanPenolakan: null,
+  },
+  {
+    id: 'REQ003',
+    namaBarang: 'Paket Sembako',
+    gambarBarang: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=100&h=100&fit=crop',
+    tanggalPengajuan: '2024-11-10',
+    tanggalApprove: null,
+    tanggalReject: '2024-11-12',
+    status: 'rejected',
+    pesanPenolakan: 'Stok barang sedang habis, silakan ajukan kembali bulan depan',
+  },
+])
+
+const showModal = ref(false)
+const formData = ref({
+  namaBarang: '',
+  gambarBarang: '',
+})
+
+const handleSubmit = () => {
+  if (!formData.value.namaBarang.trim()) return
+
+  const newRequest = {
+    id: `REQ${String(requests.value.length + 1).padStart(3, '0')}`,
+    namaBarang: formData.value.namaBarang,
+    gambarBarang:
+      formData.value.gambarBarang ||
+      'https://images.unsplash.com/photo-1558769132-cb1aea19d909?w=100&h=100&fit=crop',
+    tanggalPengajuan: new Date().toISOString().split('T')[0],
+    tanggalApprove: null,
+    tanggalReject: null,
+    status: 'pending',
+    pesanPenolakan: null,
+  }
+
+  requests.value.push(newRequest)
+  formData.value = { namaBarang: '', gambarBarang: '' }
+  showModal.value = false
+}
+
+const getStatusBadge = (status) => {
+  switch (status) {
+    case 'approved':
+      return {
+        class: 'bg-green-500/20 text-green-400',
+        label: 'Disetujui',
+        icon: CheckCircle,
+      }
+    case 'rejected':
+      return {
+        class: 'bg-red-500/20 text-red-400',
+        label: 'Ditolak',
+        icon: XCircle,
+      }
+    default:
+      return {
+        class: 'bg-yellow-500/20 text-yellow-400',
+        label: 'Menunggu',
+        icon: Clock,
+      }
+  }
+}
 const isOpenModal = ref(false)
 const isOpenModalAjuanBarang = ref(false)
 const activeTab = ref('home')
