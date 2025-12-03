@@ -1,6 +1,64 @@
 <!-- eslint-disable vue/multi-word-component-names -->
+
+<script setup>
+import { useTheme } from '@/store/themeStore'
+import { ref } from 'vue'
+import { Upload, Plus, X, File, Image as ImageIcon, EyeIcon } from 'lucide-vue-next'
+
+const documents = ref([])
+const dragActive = ref(false)
+const theme = useTheme()
+
+const handleDrag = (e) => {
+  e.preventDefault()
+  e.stopPropagation()
+  if (e.type === 'dragenter' || e.type === 'dragover') {
+    dragActive.value = true
+  } else if (e.type === 'dragleave') {
+    dragActive.value = false
+  }
+}
+
+const handleDrop = (e) => {
+  e.preventDefault()
+  e.stopPropagation()
+  dragActive.value = false
+
+  const files = Array.from(e.dataTransfer.files)
+  handleFiles(files)
+}
+
+const handleFileInput = (e) => {
+  const files = Array.from(e.target.files)
+  handleFiles(files)
+}
+
+const handleFiles = (files) => {
+  const newDocs = files.map((file) => ({
+    id: Date.now() + Math.random(),
+    name: file.name,
+    size: (file.size / 1024).toFixed(2) + ' KB',
+    type: file.type,
+    preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : null,
+    uploadDate: new Date().toLocaleDateString('id-ID'),
+  }))
+
+  documents.value = [...documents.value, ...newDocs]
+}
+
+const removeDocument = (id) => {
+  documents.value = documents.value.filter((doc) => doc.id !== id)
+}
+
+// const handleCreateDocumentation = () => {
+//   alert('Dokumentasi berhasil dibuat!')
+// }
+</script>
 <template>
-  <div class="min-h-screen bg-gray-900 text-gray-100 p-8">
+  <div
+    class="min-h-screen p-8"
+    :class="theme.isdarkMode ? 'dark:bg-gray-900 dark:text-gray-100' : 'bg-gray-100 text-black'"
+  >
     <div class="max-w-6xl mx-auto">
       <!-- Header -->
       <div class="mb-8 flex items-start justify-between">
@@ -63,23 +121,30 @@
             class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg cursor-pointer transition-colors"
           >
             <Plus class="w-5 h-5" />
-            <span class="font-medium">Tambah Gambar</span>
+            <span class="font-medium">Tambah Dokumentasi</span>
             <input type="file" multiple accept="image/*" @change="handleFileInput" class="hidden" />
           </label>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 z-0">
           <div
             v-for="doc in documents"
             :key="doc.id"
             class="bg-gray-800 rounded-lg overflow-hidden hover:ring-2 hover:ring-blue-500 transition-all"
           >
-            <div class="h-48 bg-gray-700 flex items-center justify-center">
+            <div
+              class="group relative h-48 flex items-center justify-center"
+              :class="theme.isdarkMode ? 'bg-gray-700' : 'bg-gray-400'"
+            >
+              <EyeIcon
+                class="h-10 w-10 absolute opacity-0 group-hover:opacity-100 cursor-pointer m-auto text-gray-600 transition-opacity"
+              />
+
               <img
                 v-if="doc.preview"
                 :src="doc.preview"
                 :alt="doc.name"
-                class="w-full h-full object-cover"
+                class="w-full h-full cursor-pointer object-cover"
               />
               <File v-else class="w-16 h-16 text-gray-500" />
             </div>
@@ -88,14 +153,14 @@
               <div class="flex items-start justify-between mb-2">
                 <div class="flex items-center gap-2 flex-1 min-w-0">
                   <ImageIcon class="w-5 h-5 text-blue-400 flex-shrink-0" />
-                  <h3 class="font-medium truncate">{{ doc.name }}</h3>
+                  <h3 class="font-medium truncate text-white">{{ doc.name }}</h3>
                 </div>
 
                 <button
                   @click="removeDocument(doc.id)"
                   class="p-1 hover:bg-red-500/20 rounded transition-colors flex-shrink-0"
                 >
-                  <X class="w-5 h-5 text-red-400" />
+                  <X class="w-5 h-5 cursor-pointer text-red-400" />
                 </button>
               </div>
 
@@ -117,55 +182,3 @@
     </div>
   </div>
 </template>
-<script setup>
-import { ref } from 'vue'
-import { Upload, Plus, X, File, Image as ImageIcon } from 'lucide-vue-next'
-
-const documents = ref([])
-const dragActive = ref(false)
-
-const handleDrag = (e) => {
-  e.preventDefault()
-  e.stopPropagation()
-  if (e.type === 'dragenter' || e.type === 'dragover') {
-    dragActive.value = true
-  } else if (e.type === 'dragleave') {
-    dragActive.value = false
-  }
-}
-
-const handleDrop = (e) => {
-  e.preventDefault()
-  e.stopPropagation()
-  dragActive.value = false
-
-  const files = Array.from(e.dataTransfer.files)
-  handleFiles(files)
-}
-
-const handleFileInput = (e) => {
-  const files = Array.from(e.target.files)
-  handleFiles(files)
-}
-
-const handleFiles = (files) => {
-  const newDocs = files.map((file) => ({
-    id: Date.now() + Math.random(),
-    name: file.name,
-    size: (file.size / 1024).toFixed(2) + ' KB',
-    type: file.type,
-    preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : null,
-    uploadDate: new Date().toLocaleDateString('id-ID'),
-  }))
-
-  documents.value = [...documents.value, ...newDocs]
-}
-
-const removeDocument = (id) => {
-  documents.value = documents.value.filter((doc) => doc.id !== id)
-}
-
-// const handleCreateDocumentation = () => {
-//   alert('Dokumentasi berhasil dibuat!')
-// }
-</script>
