@@ -1,160 +1,177 @@
 <script setup>
-import { ref } from 'vue'
 import { Edit2, Trash2 } from 'lucide-vue-next'
+import { usePengajuanPenerimaStore } from '@/store/pengajuanPenerima'
+import { computed, onMounted, onUnmounted } from 'vue'
+import socket from '@/plugins/socket'
+import { useTheme } from '@/store/themeStore'
+import Search_action from '@/components/Search_action.vue'
+import { ref } from 'vue'
 
-const data = ref([
-  {
-    id: 1,
-    namaPenerima: 'Ahmad Santoso',
-    namaBarang: 'Laptop Dell Latitude',
-    tanggalPengajuan: '2024-11-15',
-    tanggalApprove: '2024-11-20',
-    tanggalReject: null,
-  },
-  {
-    id: 2,
-    namaPenerima: 'Siti Nurhaliza',
-    namaBarang: 'Mouse Wireless Logitech',
-    tanggalPengajuan: '2024-11-18',
-    tanggalApprove: null,
-    tanggalReject: '2024-11-22',
-  },
-  {
-    id: 3,
-    namaPenerima: 'Budi Prakoso',
-    namaBarang: 'Monitor LG 24 inch',
-    tanggalPengajuan: '2024-11-20',
-    tanggalApprove: '2024-11-25',
-    tanggalReject: null,
-  },
-  {
-    id: 4,
-    namaPenerima: 'Dewi Lestari',
-    namaBarang: 'Keyboard Mechanical',
-    tanggalPengajuan: '2024-11-22',
-    tanggalApprove: null,
-    tanggalReject: null,
-  },
-  {
-    id: 5,
-    namaPenerima: 'Eko Wijaya',
-    namaBarang: 'Webcam HD Logitech',
-    tanggalPengajuan: '2024-11-25',
-    tanggalApprove: '2024-11-28',
-    tanggalReject: null,
-  },
-])
+const pengajuan = usePengajuanPenerimaStore()
+const theme = useTheme()
 
-const handleEdit = (id) => {
-  alert(`Edit data dengan ID: ${id}`)
+const handleApproved = (id) => {
+  pengajuan.approvedPengajuan(id)
+}
+const handleReject = (id) => {
+  pengajuan.rejectPengajuan(id)
 }
 
-const handleDelete = (id) => {
-  if (window.confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-    data.value = data.value.filter((item) => item.id !== id)
-  }
+onMounted(async () => {
+  await pengajuan.getPengajuanDataB()
+  socket.on('data_update', async () => {
+    await pengajuan.getPengajuanDataB()
+  })
+})
+
+onUnmounted(() => socket.off('data_update'))
+const first = ref(0)
+const rows = ref(10)
+
+const paginatedData = computed(() => {
+  return pengajuan.pengajuanDataB.slice(first.value, first.value + rows.value)
+})
+
+const onPageChange = (event) => {
+  first.value = event.first
+  rows.value = event.rows
 }
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-900 p-8">
+  <div
+    class="min-h-screen p-4 md:p-8 transition-colors duration-300"
+    :class="theme.isdarkMode ? 'dark:bg-gray-900' : 'bg-gray-50'"
+  >
     <div class="max-w-7xl mx-auto">
-      <h1 class="text-3xl font-bold text-white mb-8">Verifikasi Pengajuan Barang</h1>
+      <Search_action :display="'hidden'" :displayB="'hidden'" />
 
-      <div class="bg-gray-800 rounded-lg shadow-xl overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full">
-            <thead>
-              <tr class="bg-gray-700">
-                <th
-                  class="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider"
-                >
-                  ID
-                </th>
-                <th
-                  class="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider"
-                >
-                  Nama Penerima
-                </th>
-                <th
-                  class="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider"
-                >
-                  Nama Barang
-                </th>
-                <th
-                  class="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider"
-                >
-                  Tanggal Pengajuan
-                </th>
-                <th
-                  class="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider"
-                >
-                  Tanggal Approve
-                </th>
-                <th
-                  class="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider"
-                >
-                  Tanggal Reject
-                </th>
-                <th
-                  class="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider"
-                >
-                  Action
-                </th>
-              </tr>
-            </thead>
+      <div
+        class="mt-6 relative overflow-x-auto shadow-md rounded-xl border border-gray-200 dark:border-gray-700"
+      >
+        <table class="w-full text-xs text-left">
+          <thead
+            class="text-[11px] uppercase tracking-wider border-b border-gray-200 dark:border-gray-700"
+            :class="theme.isdarkMode ? 'bg-gray-800 text-gray-400' : 'bg-white text-gray-600'"
+          >
+            <tr>
+              <th scope="col" class="px-6 py-4">ID</th>
+              <th scope="col" class="px-6 py-4">Penerima</th>
+              <th scope="col" class="px-6 py-4">Nama Barang</th>
+              <th scope="col" class="px-6 py-4">Jumlah</th>
+              <th scope="col" class="px-6 py-4">Status</th>
+              <th scope="col" class="px-6 py-4">Timeline Pengajuan</th>
+              <th
+                scope="col"
+                class="px-6 py-4 text-center"
+                v-if="pengajuan.pengajuanDataB.some((item) => item.status === 'pending')"
+              >
+                Action
+              </th>
+            </tr>
+          </thead>
 
-            <tbody class="divide-y divide-gray-700">
-              <tr v-for="item in data" :key="item.id" class="hover:bg-gray-750 transition-colors">
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{{ item.id }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-white">
-                  {{ item.namaPenerima }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                  {{ item.namaBarang }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                  {{ item.tanggalPengajuan }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                  <span v-if="item.tanggalApprove" class="text-green-400">{{
-                    item.tanggalApprove
-                  }}</span>
-                  <span v-else class="text-gray-500">-</span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                  <span v-if="item.tanggalReject" class="text-red-400">{{
-                    item.tanggalReject
-                  }}</span>
-                  <span v-else class="text-gray-500">-</span>
-                </td>
+          <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+            <tr
+              v-for="(item, id) in paginatedData"
+              :key="item.id"
+              class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50"
+              :class="theme.isdarkMode ? 'bg-gray-800 text-gray-300' : 'bg-white text-gray-700'"
+            >
+              <td class="px-6 py-4 font-bold text-gray-900 dark:text-white">
+                {{ id + 1 }}
+              </td>
 
-                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                  <div class="flex gap-2">
-                    <button
-                      @click="handleEdit(item.id)"
-                      class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors flex items-center gap-1"
-                    >
-                      <Edit2 size="16" />
-                      <span>Edit</span>
-                    </button>
+              <td class="px-6 py-4 font-medium uppercase tracking-tight">
+                {{ item.nama_penerima }}
+              </td>
 
-                    <button
-                      @click="handleDelete(item.id)"
-                      class="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition-colors flex items-center gap-1"
-                    >
-                      <Trash2 size="16" />
-                      <span>Delete</span>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+              <td class="px-6 py-4">
+                <div class="font-semibold text-gray-900 dark:text-white">
+                  {{ item.nama_barang }}
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="font-semibold text-gray-900 dark:text-white">
+                  {{ item.jumlah }}
+                </div>
+              </td>
+
+              <td class="px-6 py-4">
+                <span
+                  class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-tighter border shadow-sm"
+                  :class="{
+                    'bg-yellow-100 text-yellow-700 border-yellow-200': item.status === 'pending',
+                    'bg-green-100 text-green-700 border-green-200': item.status === 'approved',
+                    'bg-red-100 text-red-700 border-red-200': item.status === 'rejected',
+                  }"
+                >
+                  {{ item.status }}
+                </span>
+              </td>
+
+              <td class="px-6 py-4 text-[10px] space-y-1">
+                <div class="flex items-center gap-2">
+                  <span class="w-12 opacity-60">Diajukan:</span>
+                  <span>{{ item.tanggal_pengajuan }}</span>
+                </div>
+                <div
+                  v-if="item.tanggal_approve"
+                  class="flex items-center gap-2 text-green-600 dark:text-green-400 font-medium"
+                >
+                  <span class="w-12 opacity-60">Approve:</span>
+                  <span>{{ item.tanggal_approve }}</span>
+                </div>
+                <div
+                  v-if="item.tanggal_reject"
+                  class="flex items-center gap-2 text-red-500 font-medium"
+                >
+                  <span class="w-12 opacity-60">Reject:</span>
+                  <span>{{ item.tanggal_reject }}</span>
+                </div>
+              </td>
+
+              <td
+                class="px-6 py-4 text-center"
+                v-if="pengajuan.pengajuanDataB.some((item) => item.status === 'pending')"
+              >
+                <div class="flex justify-center gap-2" v-if="item.status === 'pending'">
+                  <button
+                    @click="handleApproved(item.id)"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg transition-all active:scale-95 flex items-center gap-1.5 text-[10px] font-bold uppercase"
+                  >
+                    <Edit2 size="14" />
+                    Approve
+                  </button>
+
+                  <button
+                    @click="handleReject(item.id)"
+                    class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg transition-all active:scale-95 flex items-center gap-1.5 text-[10px] font-bold uppercase"
+                  >
+                    <Trash2 size="14" />
+                    Reject
+                  </button>
+                </div>
+                <span v-else class="text-gray-400 italic text-[10px]">No action needed</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-
-      <div class="mt-4 text-gray-400 text-sm">Total: {{ data.length }} pengajuan</div>
+      <div class="mt-4">
+        <Paginator
+          v-model:first="first"
+          :rows="rows"
+          :totalRecords="pengajuan.pengajuanDataB.length"
+          :rowsPerPageOptions="[5, 10, 20, 50]"
+          @page="onPageChange"
+          v-if="pengajuan.pengajuanDataB.length > 0"
+          template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+          :class="
+            theme.isdarkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-gray-200'
+          "
+        />
+      </div>
     </div>
   </div>
 </template>

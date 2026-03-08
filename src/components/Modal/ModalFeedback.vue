@@ -29,7 +29,11 @@
           </div>
 
           <div class="flex justify-end space-x-3 pt-2">
-            <button type="submit" class="focus:outline-none">
+            <button
+              type="submit"
+              class="focus:outline-none"
+              @click="[emit('close'), donasi.rejectItem(props.itemId)]"
+            >
               <CheckIcon
                 class="h-6 cursor-pointer w-6 text-green-500 hover:text-green-400 transition"
               />
@@ -49,6 +53,7 @@
 <script setup>
 import { CheckIcon, XMarkIcon } from '@heroicons/vue/24/solid'
 import { useNotif } from '@/store/notif'
+import { useDataDonasi } from '@/store/dataDonasi'
 
 const notif = useNotif()
 
@@ -56,6 +61,7 @@ const props = defineProps({
   isOpen: Boolean,
   itemId: [String, Number],
 })
+const donasi = useDataDonasi()
 const emit = defineEmits(['close'])
 </script>
 

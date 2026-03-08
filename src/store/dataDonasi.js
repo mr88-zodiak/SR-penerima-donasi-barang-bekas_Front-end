@@ -16,7 +16,7 @@ export const useDataDonasi = defineStore('dataDonasi', () => {
         {
           headers: {
             'Content-Type': 'multipart/form-data',
-            Authorization: `Bearer ${localStorage.getItem('token_donatur')}`,
+            Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
           },
         },
       )
@@ -29,7 +29,7 @@ export const useDataDonasi = defineStore('dataDonasi', () => {
   }
   const getData = async () => {
     try {
-      const token = localStorage.getItem('token')
+      const token = localStorage.getItem('auth_token')
       const response = await axios.get('http://localhost:5000/donasi/api/get/donasi', {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -43,7 +43,6 @@ export const useDataDonasi = defineStore('dataDonasi', () => {
           penerimaName: item.penerima_name,
           kondisi: decode(item.kondisi_barang),
           jenisBarang: item.barang,
-          jumlah: item.jumlah,
           tanggalDonasi: item.tanggal_donasi?.split('T')[0] || '-',
           tanggalApprove: item.tanggal_approve ? item.tanggal_approve.split('T')[0] : '-',
           tanggalReject: item.tanggal_reject ? item.tanggal_reject.split('T')[0] : '-',
@@ -58,7 +57,7 @@ export const useDataDonasi = defineStore('dataDonasi', () => {
   }
   const getDataP = async () => {
     try {
-      const token = localStorage.getItem('token_penerima')
+      const token = localStorage.getItem('auth_token')
       const response = await axios.get('http://localhost:5000/donasi/api/get/donasi', {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -87,7 +86,7 @@ export const useDataDonasi = defineStore('dataDonasi', () => {
     try {
       const respon = await axios.put(`http://localhost:5000/donasi/api/put/approve/${id}`, null, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
       })
       alert(respon.data)
@@ -99,7 +98,7 @@ export const useDataDonasi = defineStore('dataDonasi', () => {
     try {
       const respon = await axios.put(`http://localhost:5000/donasi/api/reject/${id}`, null, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
       })
       alert(respon.data.message)
@@ -147,10 +146,10 @@ export const useDataDonasi = defineStore('dataDonasi', () => {
     try {
       const response = await axios.get('http://localhost:5000/donasi/api/get/riwayatDonasi', {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token_donatur')}`,
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
       })
-      console.log(response.data.riwayat)
+      // console.log(response.data.riwayat)
       const data = response.data.riwayat.map((item) => {
         return {
           id: item.id,
@@ -164,10 +163,12 @@ export const useDataDonasi = defineStore('dataDonasi', () => {
           tanggal_reject: item.tanggal_reject ? item.tanggal_reject.split('T')[0] : '-',
           pesan: item.pesan,
           statusPengiriman: formatStatus(item.status_pengiriman),
+          terkumpul: item.donasi_terkumpul,
         }
       })
       data.sort((a, b) => a.id - b.id)
       riwayatDonasi.splice(0, riwayatDonasi.length, ...data)
+      // console.log(riwayatDonasi)
     } catch (e) {
       console.log(e)
     }
@@ -176,7 +177,7 @@ export const useDataDonasi = defineStore('dataDonasi', () => {
     try {
       const response = await axios.put(`http://localhost:5000/donasi/api/done/${id}`, null, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
       })
       console.log(response.data.message)
@@ -190,7 +191,7 @@ export const useDataDonasi = defineStore('dataDonasi', () => {
         `http://localhost:5000/donasi/api/get/Kategori/${kategori}`,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token_penerima')}`,
+            Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
           },
         },
       )
@@ -218,7 +219,7 @@ export const useDataDonasi = defineStore('dataDonasi', () => {
     try {
       const response = await axios.get('http://localhost:5000/donasi/api/get/donasiTerbaru', {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token_penerima')}`,
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
       })
       // console.log(response.data.donasi)
@@ -248,8 +249,8 @@ export const useDataDonasi = defineStore('dataDonasi', () => {
   const totalKategoriBuku = computed(() => kategoriBuku.length)
   const totalKategoriElektronik = computed(() => kategoriElektronik.length)
   const totalKategoriDapur = computed(() => kategoriDapur.length)
-  const totalSelesai = computed(() =>
-    DataDonasiTerkini.map((item) => item.statusPengiriman === 'selesai'),
+  const totalSelesai = computed(
+    () => DataDonasiTerkini.filter((item) => item.statusPengiriman === 'Selesai').length,
   )
   return {
     tableData,

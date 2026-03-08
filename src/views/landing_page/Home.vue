@@ -1,4 +1,5 @@
 <!-- eslint-disable vue/multi-word-component-names -->
+<!-- eslint-disable no-unused-vars -->
 <script setup>
 import { Bars3Icon, XMarkIcon } from '@heroicons/vue/24/outline'
 import {
@@ -23,55 +24,63 @@ import {
   Heart,
   Package,
 } from 'lucide-vue-next'
+
 import socket from '@/plugins/socket'
 import { useDonatur } from '@/store/donatur'
 import { usePenerima } from '@/store/penerima'
 import { useBarang } from '@/store/barang'
-import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
+import { onMounted, onUnmounted, reactive, ref, watch } from 'vue'
+
 const donatur = useDonatur()
 const penerima = usePenerima()
 const barang = useBarang()
 
-onMounted(async () => {
-  await penerima.getDataPenerima()
-  await donatur.getDataDonatur()
-  await barang.getDataBarang()
-  socket.on('data_update', async () => {
-    await penerima.getDataPenerima()
-    await donatur.getDataDonatur()
-    await barang.getDataBarang()
+/* =======================
+   STATS (FIXED)
+======================= */
+const stats = reactive([
+  { id: 1, icon: CubeIcon, value: 0, label: 'Barang Terkumpul', current: 0 },
+  { id: 2, icon: UsersIcon, value: 0, label: 'Donatur', current: 0 },
+  { id: 3, icon: HeartIcon, value: 0, label: 'Penerima Manfaat', current: 0 },
+])
 
-    // stats.value.forEach((stat) => {
-    //   stat.current = stat.value // update langsung
-    // })
+onMounted(async () => {
+  await Promise.all([
+    penerima.getJumlahPenerima(),
+    donatur.getJumlahDonatur(),
+    barang.getDataBarang(),
+  ])
+
+  socket.on('data_update', async () => {
+    await Promise.all([
+      penerima.getJumlahPenerima(),
+      donatur.getJumlahDonatur(),
+      barang.getDataBarang(),
+    ])
   })
 })
+
 onUnmounted(() => {
   socket.off('data_update')
 })
-const stats = computed(() => [
-  {
-    id: 1,
-    icon: CubeIcon,
-    value: barang.totalDataBarang,
-    label: 'Barang Terkumpul',
-    current: 0,
+
+watch(
+  () => [barang.totalDataBarang, donatur.totalData, penerima.totalDataPenerima],
+  ([b, d, p]) => {
+    if (stats.length < 3) return
+
+    stats[0].value = +b || 0
+    stats[1].value = +d || 0
+    stats[2].value = +p || 0
+
+    // reset animasi saat data berubah
+    stats.forEach((stat) => {
+      stat.current = 0
+      animateValue(stat)
+    })
   },
-  {
-    id: 2,
-    icon: UsersIcon,
-    value: donatur.totalData,
-    label: 'Donatur',
-    current: 0,
-  },
-  {
-    id: 3,
-    icon: HeartIcon,
-    value: penerima.totalDataPenerima,
-    label: 'Penerima Manfaat',
-    current: 0,
-  },
-])
+  { immediate: true },
+)
 
 const categories = reactive([
   {
@@ -117,17 +126,23 @@ const categories = reactive([
     duration: '1000',
   },
 ])
+
 const isOpen = ref(true)
 const toggleSidebar = () => {
   isOpen.value = !isOpen.value
 }
+
 const isScrolled = ref(false)
-onMounted(() =>
+
+onMounted(() => {
   window.addEventListener('scroll', () => {
     isScrolled.value = window.scrollY > 50
-  }),
-)
+  })
+})
 
+/* =======================
+   ANIMATE NUMBER BUG WS FIX
+======================= */
 function animateValue(stat, duration = 2000) {
   const start = 0
   const end = stat.value
@@ -138,29 +153,27 @@ function animateValue(stat, duration = 2000) {
     const progress = Math.min(elapsed / duration, 1)
     stat.current = Math.floor(progress * (end - start) + start)
 
-    if (progress < 1) {
-      requestAnimationFrame(update)
-    }
+    if (progress < 1) requestAnimationFrame(update)
   }
 
   requestAnimationFrame(update)
 }
 
+/* =======================
+   INTERSECTION OBSERVER BUG WS FIX
+======================= */
 onMounted(() => {
   const section = document.getElementById('stats-section')
-
   if (!section) return
 
   const observer = new IntersectionObserver(
     (entries, observer) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          stats.value.forEach((stat) => {
-            if (stat.current === 0) {
-              animateValue(stat, 2000)
-            }
+          stats.forEach((stat) => {
+            if (stat.current === 0) animateValue(stat)
           })
-          observer.unobserve(section) // supaya animasi cuma sekali
+          observer.unobserve(section)
         }
       })
     },
@@ -183,14 +196,14 @@ onMounted(() => {
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center py-4">
           <div class="flex items-center gap-3">
-            <div class="bg-gradient-to-r from-green-400 to-blue-500 p-2 rounded-lg">
+            <div class="bg-linear-to-r from-green-400 to-blue-500 p-2 rounded-lg">
               <ArrowPathIcon class="w-8 h-8 text-white" />
             </div>
             <div>
               <h1
-                class="text-xl md:text-2xl font-bold bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent"
+                class="text-xl md:text-2xl font-bold bg-[linear-gradient(90deg,#4ade80,#3b82f6,#4ade80)] bg-size-[200%_100%] bg-clip-text text-transparent animate-[gradientMove_3s_linear_infinite]"
               >
-                DonasiKita
+                Donasi<span>Kita</span>
               </h1>
               <p class="text-xs md:text-sm text-gray-400">Berbagi untuk Berkelanjutan</p>
             </div>
@@ -246,11 +259,7 @@ onMounted(() => {
       id="home"
       class="flex flex-col justify-center items-center min-h-screen bg-[#0d1321] text-center md:py-32"
     >
-      <h1
-        class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500"
-      >
-        Berikan Kehidupan Baru untuk Barang Bekas Anda
-      </h1>
+      <h1 class="text-4xl font-bold">Berikan Kehidupan Baru untuk Barang Bekas Anda</h1>
       <p class="mt-4 text-gray-300 max-w-3xl sm:text-lg">
         Bergabunglah dengan gerakan berkelanjutan kami. Donasikan barang bekas berkualitas dan bantu
         mereka yang membutuhkan sambil mengurangi jejak karbon untuk planet yang lebih hijau.
@@ -258,7 +267,7 @@ onMounted(() => {
       <div class="flex flex-col w-full sm:w-auto sm:flex-row gap-4 justify-center p-3">
         <router-link
           to="/DonasiKita/login"
-          class="bg-gradient-to-r cursor-pointer from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-3 md:px-8 md:py-4 rounded-full font-semibold transition-all transform hover:scale-105 shadow-lg"
+          class="bg-linear-to-r cursor-pointer from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-3 md:px-8 md:py-4 rounded-full font-semibold transition-all transform hover:scale-105 shadow-lg"
         >
           Mulai Donasi Sekarang
         </router-link>
@@ -363,7 +372,7 @@ onMounted(() => {
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           <div class="text-center group" v-for="item in stats" :key="item.id">
             <div
-              class="bg-gradient-to-br from-green-500 to-blue-600 p-4 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center group-hover:scale-110 transition-transform"
+              class="bg-linear-to-br from-green-500 to-blue-600 p-4 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center group-hover:scale-110 transition-transform"
             >
               <component :is="item.icon" class="w-8 h-8 text-white" />
             </div>
@@ -489,7 +498,7 @@ onMounted(() => {
             <div class="space-y-6">
               <div class="flex items-start space-x-4" data-aos="fade-up" data-aos-delay="0">
                 <div
-                  class="flex-shrink-0 w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-sm font-semibold"
+                  class="shrink-0 w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-sm font-semibold"
                 >
                   1
                 </div>
@@ -504,7 +513,7 @@ onMounted(() => {
 
               <div class="flex items-start space-x-4" data-aos="fade-up" data-aos-delay="10">
                 <div
-                  class="flex-shrink-0 w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-sm font-semibold"
+                  class="shrink-0 w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-sm font-semibold"
                 >
                   2
                 </div>
@@ -519,7 +528,7 @@ onMounted(() => {
 
               <div class="flex items-start space-x-4" data-aos="fade-up" data-aos-delay="30">
                 <div
-                  class="flex-shrink-0 w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-sm font-semibold"
+                  class="shrink-0 w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-sm font-semibold"
                 >
                   3
                 </div>
@@ -534,7 +543,7 @@ onMounted(() => {
 
               <div class="flex items-start space-x-4" data-aos="fade-up" data-aos-delay="50">
                 <div
-                  class="flex-shrink-0 w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-sm font-semibold"
+                  class="shrink-0 w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-sm font-semibold"
                 >
                   4
                 </div>
@@ -549,7 +558,7 @@ onMounted(() => {
 
               <div class="flex items-start space-x-4" data-aos="fade-up" data-aos-delay="70">
                 <div
-                  class="flex-shrink-0 w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-sm font-semibold"
+                  class="shrink-0 w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-sm font-semibold"
                 >
                   5
                 </div>
@@ -670,7 +679,7 @@ onMounted(() => {
             <div class="space-y-6">
               <div class="flex items-start space-x-4" data-aos="fade-up" data-aos-delay="0">
                 <div
-                  class="flex-shrink-0 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-sm font-semibold"
+                  class="shrink-0 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-sm font-semibold"
                 >
                   1
                 </div>
@@ -684,7 +693,7 @@ onMounted(() => {
 
               <div class="flex items-start space-x-4" data-aos="fade-up" data-aos-delay="10">
                 <div
-                  class="flex-shrink-0 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-sm font-semibold"
+                  class="shrink-0 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-sm font-semibold"
                 >
                   2
                 </div>
@@ -698,7 +707,7 @@ onMounted(() => {
 
               <div class="flex items-start space-x-4" data-aos="fade-up" data-aos-delay="30">
                 <div
-                  class="flex-shrink-0 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-sm font-semibold"
+                  class="shrink-0 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-sm font-semibold"
                 >
                   3
                 </div>
@@ -712,7 +721,7 @@ onMounted(() => {
 
               <div class="flex items-start space-x-4" data-aos="fade-up" data-aos-delay="50">
                 <div
-                  class="flex-shrink-0 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-sm font-semibold"
+                  class="shrink-0 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-sm font-semibold"
                 >
                   4
                 </div>
@@ -809,7 +818,7 @@ onMounted(() => {
         <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           <div class="text-center">
             <div
-              class="bg-gradient-to-br from-green-500 to-blue-600 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center"
+              class="bg-linear-to-br from-green-500 to-blue-600 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center"
             >
               <PhoneIcon class="w-8 h-8 text-white" />
             </div>
@@ -819,7 +828,7 @@ onMounted(() => {
           </div>
           <div class="text-center">
             <div
-              class="bg-gradient-to-br from-green-500 to-blue-600 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center"
+              class="bg-linear-to-br from-green-500 to-blue-600 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center"
             >
               <EnvelopeIcon class="w-8 h-8 text-white" />
             </div>
@@ -829,13 +838,15 @@ onMounted(() => {
           </div>
           <div class="text-center">
             <div
-              class="bg-gradient-to-br from-green-500 to-blue-600 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center"
+              class="bg-linear-to-br from-green-500 to-blue-600 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center"
             >
               <MapPinIcon class="w-8 h-8 text-white" />
             </div>
             <h4 class="text-lg md:text-xl font-semibold mb-2 text-green-400">Alamat</h4>
-            <p class="text-gray-300 text-sm md:text-base">Jl. Berkelanjutan No. 123</p>
-            <p class="text-gray-300 text-sm md:text-base">Jakarta Selatan, 12345</p>
+            <p class="text-gray-300 text-sm md:text-base">
+              Jl. Raya Pulungan no. 01, Sedati,Sidoarjo
+            </p>
+            <p class="text-gray-300 text-sm md:text-base">Jawa timur</p>
           </div>
         </div>
       </div>
@@ -857,11 +868,11 @@ onMounted(() => {
         <div class="grid gap-8 sm:grid-cols-2 md:grid-cols-4">
           <div>
             <div class="flex items-center gap-3 mb-4">
-              <div class="bg-gradient-to-r from-green-400 to-blue-500 p-2 rounded-lg">
+              <div class="bg-linear-to-r from-green-400 to-blue-500 p-2 rounded-lg">
                 <ArrowPathIcon class="w-6 h-6 text-white" />
               </div>
               <span
-                class="text-lg md:text-xl font-bold bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent"
+                class="text-lg md:text-xl font-bold bg-linear-to-r from-green-400 to-blue-500 bg-clip-text text-transparent"
               >
                 DonasiKita
               </span>
@@ -896,7 +907,7 @@ onMounted(() => {
             <div class="space-y-2 text-gray-400 text-sm md:text-base">
               <div class="flex items-center gap-2">
                 <ClockIcon class="w-4 h-4" />
-                <span>Senin - Jumat: 08:00 - 17:00</span>
+                <span>Senin - Kamis: 08.00 - 16.00 WIB</span>
               </div>
               <div class="flex items-center gap-2">
                 <ClockIcon class="w-4 h-4" />
@@ -904,7 +915,7 @@ onMounted(() => {
               </div>
               <div class="flex items-center gap-2">
                 <ClockIcon class="w-4 h-4" />
-                <span>Minggu: Tutup</span>
+                <span>Jumat: 08.00 - 16.30 WIB</span>
               </div>
             </div>
           </div>
@@ -912,7 +923,10 @@ onMounted(() => {
         <div
           class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400 text-xs md:text-sm"
         >
-          <p>&copy; 2024 DonasiKita. All rights reserved. Made with 🍌 for a sustainable future.</p>
+          <p>
+            &copy; 2026 DonasiKita. All rights reserved. Made with Bima Sena W.P for a sustainable
+            future.
+          </p>
         </div>
       </div>
     </footer>
@@ -933,6 +947,17 @@ onMounted(() => {
     opacity: 0;
     transform: translateY(-10px);
   }
+}
+@keyframes gradientMove {
+  0% {
+    background-position: 0%;
+  }
+  100% {
+    background-position: 200%;
+  }
+}
+.animasi-heading-loop {
+  animation: gradientMove 3s linear infinite;
 }
 
 .animasi-fade-up {

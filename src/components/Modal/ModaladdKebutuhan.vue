@@ -3,7 +3,7 @@
 import axios from 'axios'
 import { ref, computed } from 'vue'
 
-const props = defineProps({
+defineProps({
   isOpen: Boolean,
   disable: { type: Boolean, default: true },
   dispay: { type: String, default: 'hidden' },
@@ -15,9 +15,7 @@ const formData = ref({
   tanggungan: null,
   kendaraan: null,
   status_tempat_tinggal: '',
-  kategori: '',
-  jenis_kebutuhan: '',
-  jumlah: '',
+  alamat: '',
 })
 
 const statusOptions = ['milik sendiri', 'ngontrak', 'menumpang']
@@ -38,13 +36,7 @@ const errors = computed(() => ({
   status_tempat_tinggal: !formData.value.status_tempat_tinggal
     ? 'Status tempat tinggal harus dipilih'
     : '',
-  jenis_kebutuhan: !formData.value.jenis_kebutuhan.trim()
-    ? 'Jenis kebutuhan tidak boleh kosong'
-    : '',
-  jumlah:
-    formData.value.jumlah === null || formData.value.jumlah === '' || formData.value.jumlah < 1
-      ? 'Jumlah tidak boleh kosong atau kurang dari 1'
-      : '',
+  alamat: !formData.value.alamat.trim() ? 'Alamat tidak boleh kosong' : '',
 }))
 
 const disableSubmit = computed(() => Object.values(errors.value).some((e) => e !== ''))
@@ -55,9 +47,7 @@ const resetForm = () => {
     tanggungan: null,
     kendaraan: null,
     status_tempat_tinggal: '',
-    kategori: '',
-    jenis_kebutuhan: '',
-    jumlah: '',
+    alamat: '',
   }
 }
 
@@ -66,8 +56,14 @@ const handleSubmit = async () => {
 
   try {
     const respon = await axios.post(
-      'http://localhost:5000/user/api/post/modal/personal',
+      'http://localhost:5000/user/api/post/personalData',
       formData.value,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+        },
+      },
     )
     alert(respon.data.message)
     resetForm()
@@ -143,47 +139,16 @@ const handleSubmit = async () => {
             {{ errors.status_tempat_tinggal }}
           </p>
         </div>
-
-        <!-- Jenis Kebutuhan -->
+        <!-- Alamat -->
         <div>
-          <label class="block mb-1">Jenis Kebutuhan</label>
-          <select
-            v-model="formData.kategori"
-            class="w-full p-2 rounded bg-gray-700 border border-gray-600"
-          >
-            <option value="">--pilih jenis kebutuhan--</option>
-            <option value="elektronik">Elektronik</option>
-            <option value="buku">buku</option>
-            <option value="furniture">Furniture</option>
-            <option value="peralatan dapur">Peralatan dapur</option>
-            <option value="pakaian">Pakaian</option>
-          </select>
-          <p v-if="errors.jenis_kebutuhan" class="text-red-400 text-sm mt-1">
-            {{ errors.jenis_kebutuhan }}
-          </p>
-        </div>
-        <div>
-          <label class="block mb-1">Nama Barang</label>
-          <textarea
-            v-model="formData.jenis_kebutuhan"
-            rows="3"
-            class="w-full p-2 rounded bg-gray-700 border border-gray-600"
-          ></textarea>
-          <p v-if="errors.jenis_kebutuhan" class="text-red-400 text-sm mt-1">
-            {{ errors.jenis_kebutuhan }}
-          </p>
-        </div>
-        <div>
-          <label class="block mb-1">Jumlah</label>
+          <label class="block mb-1">Alamat</label>
           <input
-            v-model="formData.jumlah"
+            v-model="formData.alamat"
             type="text"
-            min="0"
             class="w-full p-2 rounded bg-gray-700 border border-gray-600"
           />
-          <p v-if="errors.jumlah" class="text-red-400 text-sm mt-1">{{ errors.jumlah }}</p>
+          <p v-if="errors.alamat" class="text-red-400 text-sm mt-1">{{ errors.alamat }}</p>
         </div>
-
         <!-- Buttons -->
         <div class="flex justify-end space-x-2 pt-4">
           <button

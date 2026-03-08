@@ -22,8 +22,6 @@ onMounted(async () => {
   await barang.getDataBarang()
   await donasi.getData()
   await klasifikasi.getData()
-  await barang.fetchChartData()
-  await barang.fetchPieChartData()
 
   socket.on('data_update', async () => {
     await penerima.getDataPenerima()
@@ -31,8 +29,6 @@ onMounted(async () => {
     await barang.getDataBarang()
     await donasi.getData()
     await klasifikasi.getData()
-    await barang.fetchChartData()
-    await barang.fetchPieChartData()
   })
   window.addEventListener('storage', updateTheme)
 })
@@ -48,12 +44,10 @@ const getBgColor = (id) => {
   if (id === 1) return 'bg-green-200'
   if (id === 2) return 'bg-blue-200'
   if (id === 3) return 'bg-yellow-200'
-  if (id === 4) return 'bg-red-200 hover:bg-red-400 cursor-pointer'
+  if (id === 4) return 'bg-red-200'
   if (id === 5) return 'bg-purple-400'
-  return 'bg-pink-300 hover:bg-pink-400 cursor-pointer'
+  return 'bg-pink-300'
 }
-
-const activeChart = ref(null)
 
 const Infodonations = computed(() => [
   {
@@ -75,7 +69,6 @@ const Infodonations = computed(() => [
     id: 4,
     name: 'Total donasi',
     jumlah: donasi.totalData,
-    OpenComponent: 'bar', // klik ini buka bar chart
   },
   {
     id: 5,
@@ -86,7 +79,6 @@ const Infodonations = computed(() => [
     id: 6,
     name: 'Total barang',
     jumlah: barang.totalDataBarang,
-    OpenComponent: 'pie', // klik ini buka pie chart
   },
 ])
 watch(
@@ -98,92 +90,55 @@ watch(
   () => barang.categoriesBar,
   (val) => console.log('📅 X-Axis Dates Updated:', val),
 )
-
-const chartOptionsBar = computed(() => ({
-  chart: {
-    type: 'bar',
-    background: 'transparent',
-    foreColor: isDark.value ? '#fff' : '#000',
-  },
-  grid: {
-    borderColor: isDark.value ? '#444' : '#e0e0e0',
-  },
-  title: {
-    text: 'Total Donasi per Kategori',
-    style: {
-      color: isDark.value ? '#fff' : '#000',
-    },
-  },
-  xaxis: {
-    categories: barang.categoriesBar, // 🟢 tambahkan ini
-    labels: {
-      rotate: -45,
-      style: {
-        colors: isDark.value ? '#fff' : '#000',
-      },
-    },
-  },
-  yaxis: {
-    labels: {
-      style: {
-        colors: isDark.value ? '#fff' : '#000',
-      },
-    },
-  },
-}))
-
-const chartOptionsPie = computed(() => ({
-  chart: { type: 'pie', background: 'transparent' },
-  theme: { mode: isDark.value ? 'dark' : 'light' },
-  labels: barang.labelsPie,
-  legend: { labels: { colors: isDark.value ? '#ffffff' : '#000000' } },
-}))
 </script>
 
 <template>
   <div
-    class="flex flex-col items-center mt-4 justify-center shadow-md p-4 bg-inherit rounded-lg max-w-screen max-h-screen overflow-auto"
-    :class="theme.isdarkMode ? 'dark:bg-gray-800 dark:text-white' : 'bg-white text-black'"
+    class="flex flex-col items-center min-h-screen w-full p-4 md:p-6 transition-colors duration-300"
+    :class="theme.isdarkMode ? 'dark:bg-gray-900 dark:text-white' : 'bg-gray-50 text-gray-900'"
   >
-    <!-- Info Cards -->
-    <div
-      class="information-blo mx-auto mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 w-full gap-4 p-3"
-    >
+    <div class="w-full max-w-7xl mb-6">
+      <h1 class="text-2xl font-extrabold tracking-tight">Ringkasan Statistik</h1>
+      <p class="text-sm opacity-60">Pantau performa donasi dan aktivitas pengguna Anda.</p>
+    </div>
+
+    <div class="mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 w-full max-w-7xl gap-6">
       <div
         v-for="info in Infodonations"
         :key="info.id"
         @click="info.OpenComponent ? (activeChart = info.OpenComponent) : null"
+        class="relative group cursor-pointer"
       >
         <div
-          class="kotak w-full p-4 rounded-lg dark:shadow-lg text-black transition-all duration-300"
+          class="relative overflow-hidden p-6 rounded-2xl shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border border-white/20"
           :class="getBgColor(info.id)"
         >
-          <h2 class="text-lg font-semibold">{{ info.name }}</h2>
-          <p class="text-2xl font-bold">{{ info.jumlah }}</p>
-        </div>
-      </div>
-    </div>
+          <div
+            class="absolute -right-4 -bottom-4 opacity-10 transition-transform group-hover:scale-125 group-hover:-rotate-12"
+          >
+            <svg class="w-24 h-24 text-black" fill="currentColor" viewBox="0 0 24 24">
+              <path
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
+              />
+            </svg>
+          </div>
 
-    <!-- Chart Section -->
-    <div class="w-full h-[500px] p-4 mt-4">
-      <apexchart
-        v-if="activeChart === 'bar'"
-        type="bar"
-        :options="chartOptionsBar"
-        :series="barang.seriesBar"
-        width="100%"
-        height="100%"
-      />
-      <apexchart
-        v-else-if="activeChart === 'pie'"
-        type="pie"
-        :options="chartOptionsPie"
-        :series="barang.seriesPie"
-        width="100%"
-        height="100%"
-      />
-      <div v-else class="text-center text-gray-400">
-        Klik salah satu kotak untuk menampilkan grafik
+          <div class="relative z-10">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-black/60 mb-1">
+              {{ info.name }}
+            </h2>
+            <div class="flex items-baseline gap-2">
+              <p class="text-3xl font-black text-black">
+                {{ info.jumlah }}
+              </p>
+              <!-- <span
+                class="text-[10px] bg-white/40 px-1.5 py-0.5 rounded-full font-bold text-black/70"
+              >
+                +12%
+              </span> -->
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

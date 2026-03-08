@@ -10,7 +10,7 @@ export const useDataRekomendasi = defineStore('useDataRekomendasi', () => {
     try {
       const response = await axios.get('http://localhost:5000/rekomendasi/api/get/data/personal', {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
       })
       console.log(response.data.data)

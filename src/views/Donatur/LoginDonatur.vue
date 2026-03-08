@@ -63,7 +63,10 @@ const route = useRoute()
                   required=""
                 />
               </div>
-              <div class="flex items-center justify-between"></div>
+              <!-- <div class="flex items-center justify-between"></div> -->
+              <div v-if="auth.pesanError" class="text-red-500 text-sm mb-4">
+                {{ auth.pesanError }}
+              </div>
               <button
                 type="submit"
                 :disabled="!auth.isFormValidLogin"

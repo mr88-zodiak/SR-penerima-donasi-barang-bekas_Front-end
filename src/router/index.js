@@ -345,84 +345,47 @@ const router = createRouter({
   routes,
 })
 
-/**
- * Fungsi untuk meminta Access Token baru menggunakan Refresh Token (yang ada di HttpOnly Cookie).
- * @param {string} roleKey Kunci localStorage tempat Access Token disimpan ('token', 'token_donatur', dll.)
- * @returns {Promise<string>} Access Token baru
- */
-async function refreshAccessToken(roleKey) {
-  try {
-    const res = await fetch('http://localhost:5000/user/oauth/token', {
-      method: 'POST',
-      credentials: 'include', // cookie refresh token terkirim ke backend
-    })
-
-    if (!res.ok) {
-      localStorage.removeItem(roleKey)
-      throw new Error('Refresh token tidak valid atau kedaluwarsa. Mohon login ulang.')
-    }
-
-    const data = await res.json()
-    localStorage.setItem(roleKey, data.access_token)
-    return data.access_token
-  } catch (err) {
-    localStorage.removeItem(roleKey)
-    throw err
-  }
-}
-
 router.beforeEach(async (to, from, next) => {
-  // 1. Jika rute tidak memerlukan otentikasi, lanjutkan
   if (!to.meta.requiresAuth) return next()
 
-  const tokenKeys = {
-    admin: 'token',
-    donatur: 'token_donatur',
-    penerima: 'token_penerima',
-  }
-  const key = tokenKeys[to.meta.role]
-  let token = localStorage.getItem(key)
+  const token = localStorage.getItem('auth_token')
 
-  // 2. Jika tidak ada token sama sekali, redirect ke Login
   if (!token) {
-    return next({ name: 'Login', replace: true })
+    return next({ name: 'Login' })
   }
 
   try {
-    let decoded = jwtDecode(token)
+    const decoded = jwtDecode(token)
 
-    // 3. Cek apakah Access Token kedaluwarsa
     if (decoded.exp * 1000 < Date.now()) {
-      console.log('Access Token expired. Attempting refresh...')
+      const refresh = await refreshAccessToken()
 
-      // Coba refresh token
-      token = await refreshAccessToken(key)
-      decoded = jwtDecode(token) // Decode token yang baru
+      localStorage.setItem('auth_token', refresh)
+
+      return next()
     }
 
-    // 4. Cek otorisasi peran (Role)
-    if (to.meta.role && decoded.role !== to.meta.role) {
-      console.warn(
-        `Akses ditolak: Pengguna role '${decoded.role}' mencoba mengakses rute role '${to.meta.role}'.`,
-      )
-      // PENTING: Redirect ke landing atau halaman error, bukan hanya login
-      // Tapi karena login adalah halaman netral yang Anda punya, kita gunakan itu.
-      return next({ name: 'landingPage', replace: true })
-    }
-
-    // 5. Lanjutkan ke rute tujuan
     next()
-  } catch (e) {
-    console.error('Kesalahan dalam proses decoding/validasi token:', e)
-    localStorage.removeItem(key)
-    // Redirect ke login saat decoding gagal (misalnya token rusak)
-    next({ name: 'Login', replace: true })
+  } catch (error) {
+    localStorage.removeItem('auth_token')
+    next({ name: 'Login' })
+    console.log(error)
   }
 })
 
-// 🧭 Update title halaman otomatis
-router.afterEach((to) => {
-  document.title = to.meta.title || 'DonasiKita'
-})
+async function refreshAccessToken() {
+  const res = await fetch('http://localhost:5000/user/oauth/token', {
+    method: 'POST',
+    credentials: 'include',
+  })
+
+  if (!res.ok) {
+    localStorage.removeItem('auth_token')
+    throw new Error('Refresh token tidak valid. Mohon login ulang.')
+  }
+
+  const data = await res.json()
+  return data.access_token
+}
 
 export default router

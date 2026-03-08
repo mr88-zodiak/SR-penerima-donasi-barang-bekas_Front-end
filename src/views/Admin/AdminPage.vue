@@ -86,7 +86,6 @@ const toggleDarkMode = () => {
       class="pt-18 px-4 overflow-y-auto h-full"
       :class="theme.isdarkMode ? 'dark:bg-gray-800' : 'bg-gray-100'"
     >
-      <!-- Tambahkan padding-top agar konten tidak tertutup navbar -->
       <RouterView />
     </main>
   </header>

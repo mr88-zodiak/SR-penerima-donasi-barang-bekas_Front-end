@@ -1,10 +1,9 @@
-<!-- eslint-disable no-unused-vars -->
 <script setup>
-import { computed, inject, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { XMarkIcon } from '@heroicons/vue/24/solid'
 import axios from 'axios'
 import { useTheme } from '@/store/themeStore'
-const props = defineProps({
+defineProps({
   isOpen: {
     type: Boolean,
     default: false,
@@ -14,13 +13,12 @@ const props = defineProps({
     default: '',
   },
 })
-const CloseAndOpen = ref(false)
 const formData = ref({
   name: '',
   email: '',
   username: '',
   password: '',
-  role: '',
+  role: 'donatur',
 })
 
 const disableButton = computed(
@@ -89,7 +87,7 @@ const theme = useTheme()
               required
             />
           </div>
-          <div>
+          <!-- <div>
             <label
               for="nama"
               class="block mb-2 text-sm font-medium"
@@ -107,7 +105,7 @@ const theme = useTheme()
             >
               <option value="donatur">donatur</option>
             </select>
-          </div>
+          </div> -->
 
           <!-- Email -->
           <div>

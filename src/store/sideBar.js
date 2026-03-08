@@ -105,7 +105,7 @@ export const useSideBars = defineStore('dataSideBars', () => {
     },
     {
       id: 10,
-      name: 'Verifikasi Donatur',
+      name: 'Verifikasi Pengajuan',
       icon: CheckCircleIconOutline,
       iconActive: CheckCircleIconSolid,
       link: '/verifikasi-donatur',

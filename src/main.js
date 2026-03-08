@@ -1,3 +1,4 @@
+/* eslint-disable vue/multi-word-component-names */
 // import './assets/style.css'
 
 // import { createApp } from 'vue'
@@ -41,6 +42,9 @@ import VueApexCharts from 'vue3-apexcharts'
 import AOS from 'aos'
 import 'aos/dist/aos.css'
 import socket from './plugins/socket'
+import PrimeVue from 'primevue/config'
+import Aura from '@primeuix/themes/aura'
+import Paginator from 'primevue/paginator'
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -50,6 +54,12 @@ app.use(pinia)
 app.use(router)
 app.use(ElementPlus)
 app.use(VueApexCharts)
+app.use(PrimeVue, {
+  theme: {
+    preset: Aura,
+  },
+})
+app.component('Paginator', Paginator)
 
 app.config.globalProperties.$socket = socket
 
