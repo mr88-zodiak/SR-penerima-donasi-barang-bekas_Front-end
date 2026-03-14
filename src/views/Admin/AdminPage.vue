@@ -75,7 +75,6 @@ const toggleDarkMode = () => {
             :isOpen="ismodalOpen"
             data_modal_target="popup-modal"
             :router_link="'/DonasiKita/login'"
-            token="token"
           />
         </div>
       </div>

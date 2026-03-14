@@ -5,3 +5,7 @@
   background-color: #1a202c;
   color: #cbd5e0;
 } */
+body {
+  box-sizing: border-box;
+  background-color: #1e2939;
+}

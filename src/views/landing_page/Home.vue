@@ -183,7 +183,7 @@ onMounted(() => {
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center py-4">
           <div class="flex items-center gap-3">
-            <div class="bg-gradient-to-r from-green-400 to-blue-500 p-2 rounded-lg">
+            <div class="bg-linear-to-r from-green-400 to-blue-500 p-2 rounded-lg">
               <ArrowPathIcon class="w-8 h-8 text-white" />
             </div>
             <div>

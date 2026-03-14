@@ -27,7 +27,7 @@ export const useSideBars = defineStore('dataSideBars', () => {
       name: 'Dashboard',
       icon: HomeOutline,
       iconActive: HomeSolid,
-      link: '/',
+      link: '/admin/user/data/dashboard',
       active: true,
     },
     {
@@ -35,7 +35,7 @@ export const useSideBars = defineStore('dataSideBars', () => {
       name: 'Riwayat donasi',
       icon: BanknotesIconOutline,
       iconActive: BanknotesIconSolid,
-      link: '/donasi',
+      link: '/admin/user/data/donasi',
       active: false,
     },
     {
@@ -43,7 +43,7 @@ export const useSideBars = defineStore('dataSideBars', () => {
       name: 'Barang',
       icon: ArchiveBoxIconOutline,
       iconActive: ArchiveBoxIconSolid,
-      link: '/barang',
+      link: '/admin/user/data/barang',
       active: false,
     },
     {
@@ -51,7 +51,7 @@ export const useSideBars = defineStore('dataSideBars', () => {
       name: 'Kebutuhan',
       icon: ArchiveBoxIconOutline,
       iconActive: ArchiveBoxIconSolid,
-      link: '/kebutuhan',
+      link: '/admin/user/data/kebutuhan',
       active: false,
     },
     {
@@ -59,7 +59,7 @@ export const useSideBars = defineStore('dataSideBars', () => {
       name: 'Cek kelayakan',
       icon: UserGroupIconOutline,
       iconActive: UserGroupIconSolid,
-      link: '/cek-kelayakan',
+      link: '/admin/user/data/cek-kelayakan',
       active: false,
     },
     {
@@ -67,12 +67,12 @@ export const useSideBars = defineStore('dataSideBars', () => {
       name: 'Account User',
       icon: UserIconOutline,
       iconActive: UserIconSolid,
-      link: '/donatur',
+      link: '/admin/user/data/account',
       active: false,
       children: [
-        { id: 1, name: 'Account Donatur', link: '/donatur/account' },
+        { id: 1, name: 'Account Donatur', link: '/admin/user/data/account/donatur' },
         // { id: 2, name: 'Account Admin', link: '/admin' },
-        { id: 2, name: 'Account Penerima', link: '/penerima/account' },
+        { id: 2, name: 'Account Penerima', link: '/admin/user/data/account/penerima' },
       ],
     },
     {
@@ -80,7 +80,7 @@ export const useSideBars = defineStore('dataSideBars', () => {
       name: 'Activity',
       icon: ClockIconOutline,
       iconActive: ClockIconSolid,
-      link: '/activity/role',
+      link: '/admin/user/data/activity/role',
       active: false,
     },
     {
@@ -88,7 +88,7 @@ export const useSideBars = defineStore('dataSideBars', () => {
       name: 'Authentication',
       icon: KeyIconOutline,
       iconActive: KeyIconSolid,
-      link: '/auth',
+      link: '/admin/user/data/auth',
       active: false,
     },
   ])
