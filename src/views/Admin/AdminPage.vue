@@ -39,7 +39,7 @@ const toggleDarkMode = () => {
 
     <!-- Navbar -->
     <div
-      class="fixed top-0 left-0 w-full z-50 shadow-md p-6 transition-all duration-300 ease-in-out"
+      class="fixed top-0 left-0 w-full z-10 shadow-md p-6 transition-all duration-300 ease-in-out"
       :class="theme.isdarkMode ? 'dark:bg-gray-800 dark:text-white' : 'bg-white text-black'"
     >
       <div class="flex items-center justify-between">
@@ -85,7 +85,6 @@ const toggleDarkMode = () => {
       class="pt-18 px-4 overflow-y-auto h-full"
       :class="theme.isdarkMode ? 'dark:bg-gray-800' : 'bg-gray-100'"
     >
-      <!-- Tambahkan padding-top agar konten tidak tertutup navbar -->
       <RouterView />
     </main>
   </header>

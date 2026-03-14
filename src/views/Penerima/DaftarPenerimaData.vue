@@ -13,7 +13,7 @@ const auth = useAuth()
         >
           <div class="p-6 space-y-4 md:space-y-6 sm:p-8">
             <h1 class="text-xl font-bold leading-tight tracking-tight md:text-2xl dark:text-white">
-              Masuka data pribadimu
+              Masukan data pribadimu
             </h1>
             <form class="space-y-4 md:space-y-6" action="#" @submit.prevent="auth.personalRegister">
               <div class="mb-5">
@@ -69,7 +69,7 @@ const auth = useAuth()
                   <option value="milik sendiri">Milik sendiri</option>
                 </select>
               </div>
-              <div class="mb-5">
+              <!-- <div class="mb-5">
                 <label for="kategori" class="block mb-2 text-sm font-medium dark:text-white"
                   >jenis kebutuhan</label
                 >
@@ -82,34 +82,34 @@ const auth = useAuth()
                   <option disabled value="">-- Pilih jenis kebutuhan --</option>
                   <option value="pakaian">Pakaian</option>
                   <option value="buku">buku</option>
-                  <option value="pelalatan dapur">pelalatan dapur</option>
+                  <option value="peralatan dapur">pelalatan dapur</option>
                   <option value="elektronik">elektronik</option>
                 </select>
-              </div>
-              <div class="mb-5">
-                <label for="kebutuhan" class="block mb-2 text-sm font-medium dark:text-white"
+              </div> -->
+              <!-- <div class="mb-5">
+                <label for="nama_barang" class="block mb-2 text-sm font-medium dark:text-white"
                   >nama barang</label
                 >
                 <input
                   type="text"
-                  id="kebutuhan"
+                  id="nama_barang"
                   v-model="auth.formDataPersonalRegister.jenis_kebutuhan"
                   class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-xs-light"
                   required
                 />
-              </div>
-              <!-- <div class="mb-5">
-                <label for="kebutuhan" class="block mb-2 text-sm font-medium dark:text-white"
-                  >Jumlah</label
+              </div> -->
+              <div class="mb-5">
+                <label for="alamat" class="block mb-2 text-sm font-medium dark:text-white"
+                  >Alamat</label
                 >
                 <input
                   type="text"
-                  id="kebutuhan"
-                  v-model="auth.formDataPersonalRegister.jumlah"
+                  id="alamat"
+                  v-model="auth.formDataPersonalRegister.alamat"
                   class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-xs-light"
                   required
                 />
-              </div> -->
+              </div>
 
               <button
                 type="submit"
@@ -120,8 +120,7 @@ const auth = useAuth()
                   !auth.formDataPersonalRegister.tanggungan ||
                   !auth.formDataPersonalRegister.kendaraan ||
                   !auth.formDataPersonalRegister.status_tempat_tinggal ||
-                  !auth.formDataPersonalRegister.jenis_kebutuhan ||
-                  !auth.formDataPersonalRegister.kategori
+                  !auth.formDataPersonalRegister.alamat
                     ? 'opacity-50 cursor-not-allowed bg-blue-600 '
                     : 'cursor-pointer dark:hover:bg-blue-700 dark:bg-blue-600  dark:focus:ring-blue-800'
                 "

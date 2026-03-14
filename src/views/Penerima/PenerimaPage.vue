@@ -5,7 +5,9 @@
     <nav class="bg-gray-800 border-b border-gray-700 sticky top-0 z-50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
-          <div class="flex-1"></div>
+          <div class="flex-1">
+            <h1 class="text-2xl font-bold text-emerald-400">hello, {{ auth.getUsername }}</h1>
+          </div>
           <div class="flex items-center space-x-8">
             <button
               @click="activeTab = 'home'"
@@ -30,7 +32,7 @@
               ]"
             >
               <Heart :size="20" />
-              <span class="font-medium">Pengajuan</span>
+              <span class="font-medium">Donasi masuk</span>
             </button>
             <button
               @click="activeTab = 'pengajuan'"
@@ -159,7 +161,7 @@
         </div>
 
         <!-- Banner -->
-        <div class="bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-xl p-6 text-white">
+        <!-- <div class="bg-linear-to-r from-emerald-600 to-emerald-700 rounded-xl p-6 text-white">
           <div class="flex items-center space-x-4">
             <div class="bg-white/20 p-3 rounded-lg">
               <Package :size="32" />
@@ -172,13 +174,13 @@
               </p>
             </div>
           </div>
-        </div>
+        </div> -->
       </div>
 
       <!-- DONASI TAB -->
       <div v-if="activeTab === 'donasi'">
         <div class="flex items-center justify-between mb-8">
-          <h1 class="text-3xl font-bold">Daftar Donasi</h1>
+          <h1 class="text-3xl font-bold">Daftar Donasi Masuk</h1>
           <!-- <button
             @click="isOpenModalAjuanBarang = true"
             class="bg-blue-600 cursor-pointer hover:bg-emerald-700 text-white px-6 py-2 rounded-lg font-medium transition-all"
@@ -196,21 +198,24 @@
             <table class="w-full">
               <thead class="bg-gray-700">
                 <tr>
-                  <th class="px-6 py-4 text-left text-sm font-semibold">Barang</th>
-                  <th class="px-6 py-4 text-left text-sm font-semibold">Donatur</th>
-                  <th class="px-6 py-4 text-left text-sm font-semibold">Jumlah</th>
-                  <th class="px-6 py-4 text-left text-sm font-semibold">Kondisi</th>
-                  <th class="px-6 py-4 text-left text-sm font-semibold">Tanggal</th>
-                  <th class="px-6 py-4 text-left text-sm font-semibold">Status</th>
-                  <th class="px-6 py-4 text-left text-sm font-semibold">Status Pengiriman</th>
+                  <th class="px-6 py-4 text-left text-sm font-semibold uppercase">#id</th>
+                  <th class="px-6 py-4 text-left text-sm font-semibold uppercase">Nama barang</th>
+                  <th class="px-6 py-4 text-left text-sm font-semibold uppercase">Nama donatur</th>
+                  <th class="px-6 py-4 text-left text-sm font-semibold uppercase">Kondisi</th>
+                  <th class="px-6 py-4 text-left text-sm font-semibold uppercase">Tanggal</th>
+                  <th class="px-6 py-4 text-left text-sm font-semibold uppercase">Status</th>
+                  <th class="px-6 py-4 text-left text-sm font-semibold uppercase">
+                    Status Pengiriman
+                  </th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-700">
                 <tr
-                  v-for="donation in donasi.DataDonasiTerkini"
+                  v-for="(donation, id) in paginatedDataA"
                   :key="donation.id"
                   class="hover:bg-gray-750 transition-all"
                 >
+                  <td class="px-6 py-4">{{ id + 1 }}</td>
                   <td class="px-6 py-4">{{ donation.namaBarang }}</td>
                   <td class="px-6 py-4 text-gray-400">
                     {{ donation.namaDonatur }}
@@ -218,7 +223,6 @@
                   <!-- <td class="px-6 py-4 font-semibold text-emerald-400">
                     Rp {{ donation.amount.toLocaleString('id-ID') }}
                   </td> -->
-                  <td class="px-6 py-4 text-gray-400">{{ donation.jumlah }}</td>
                   <td class="px-6 py-4 text-gray-400">{{ donation.kondisi }}</td>
                   <td class="px-6 py-4 text-gray-400">{{ donation.tanggalDonasi }}</td>
                   <td
@@ -234,7 +238,7 @@
                   <td
                     class="px-6 py-4"
                     :class="
-                      donation.statusPengiriman !== 'Selesai' ? 'text-amber-300' : 'text-green-400'
+                      donation.statusPengiriman !== 'Selesai' ? 'text-blue-300' : 'text-green-400'
                     "
                   >
                     {{ donation.statusPengiriman }}
@@ -242,6 +246,22 @@
                 </tr>
               </tbody>
             </table>
+          </div>
+          <div class="mt-4">
+            <Paginator
+              v-model:first="first"
+              :rows="rows"
+              :totalRecords="donasi.DataDonasiTerkini.length"
+              :rowsPerPageOptions="[5, 10, 20, 50]"
+              @page="onPageChange"
+              v-if="donasi.DataDonasiTerkini.length > 0"
+              template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+              :class="
+                theme.isdarkMode
+                  ? 'bg-gray-800 border-gray-700 text-white'
+                  : 'bg-white border-gray-200'
+              "
+            />
           </div>
         </div>
       </div>
@@ -269,11 +289,15 @@
               <table class="w-full">
                 <thead class="bg-gray-900">
                   <tr>
-                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">ID</th>
-                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">Gambar</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">#ID</th>
+                    <!-- <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">Gambar</th> -->
                     <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">
                       Nama Barang
                     </th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">
+                      Jenis Barang
+                    </th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">Jumlah</th>
                     <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">
                       Tanggal Pengajuan
                     </th>
@@ -284,34 +308,43 @@
                     <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">
                       Tanggal Reject
                     </th>
-                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">
+                    <th
+                      class="px-6 py-4 text-left text-sm font-semibold text-gray-300"
+                      v-if="
+                        kirimKeDatabase.pengajuanData.some((item) => item.tanggal_reject !== null)
+                      "
+                    >
                       Pesan Penolakan
+                    </th>
+                    <th
+                      class="px-6 py-4 text-left text-sm font-semibold text-gray-300"
+                      v-if="kirimKeDatabase.pengajuanData.some((item) => item.status === 'pending')"
+                    >
+                      Action
                     </th>
                   </tr>
                 </thead>
 
                 <tbody class="divide-y divide-gray-700">
                   <tr
-                    v-for="request in requests"
+                    v-for="(request, id) in paginatedDataB"
                     :key="request.id"
                     class="hover:bg-gray-750 transition-colors"
                   >
-                    <td class="px-6 py-4 text-sm font-medium text-gray-300">{{ request.id }}</td>
-
-                    <td class="px-6 py-4">
-                      <img
-                        :src="request.gambarBarang"
-                        :alt="request.namaBarang"
-                        class="w-16 h-16 object-cover rounded-lg border border-gray-600"
-                      />
-                    </td>
-
+                    <td class="px-6 py-4 text-sm font-medium text-gray-300">{{ id + 1 }}</td>
                     <td class="px-6 py-4 text-sm font-medium text-gray-200">
-                      {{ request.namaBarang }}
+                      {{ request.nama_barang }}
                     </td>
 
                     <td class="px-6 py-4 text-sm text-gray-400">
-                      {{ request.tanggalPengajuan }}
+                      {{ request.jenis_barang }}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-400">
+                      {{ request.jumlah }}
+                    </td>
+
+                    <td class="px-6 py-4 text-sm text-gray-400">
+                      {{ request.tanggal_pengajuan || '-' }}
                     </td>
 
                     <td class="px-6 py-4">
@@ -319,28 +352,65 @@
                         class="flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium"
                         :class="getStatusBadge(request.status).class"
                       >
-                        <component :is="getStatusBadge(request.status).icon" size="16" />
+                        <component :is="getStatusBadge(request.approve).icon" size="16" />
                         {{ getStatusBadge(request.status).label }}
                       </span>
                     </td>
-
-                    <td class="px-6 py-4 text-sm text-gray-400">
-                      {{ request.tanggalApprove || '-' }}
+                    <td class="px-6 py-4 text-sm text-green-400">
+                      {{ request.tanggal_approve || '-' }}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-red-400">
+                      {{ request.tanggal_reject || '-' }}
                     </td>
 
-                    <td class="px-6 py-4 text-sm text-gray-400">
-                      {{ request.tanggalReject || '-' }}
-                    </td>
-
-                    <td class="px-6 py-4 text-sm text-gray-400 max-w-xs">
-                      <span v-if="request.pesanPenolakan" class="text-red-400">
-                        {{ request.pesanPenolakan }}
+                    <td
+                      class="px-6 py-4 text-sm text-gray-400 max-w-xs"
+                      v-if="
+                        kirimKeDatabase.pengajuanData.some((item) => item.tanggal_reject !== null)
+                      "
+                    >
+                      <span v-if="request.pesan_reject" class="text-red-400">
+                        {{ request.pesan_reject }}
                       </span>
                       <span v-else>-</span>
+                    </td>
+                    <td
+                      class="px-6 py-10 flex items-center gap-3"
+                      v-if="request.status === 'pending'"
+                    >
+                      <button
+                        @click="openDeleteModal(request)"
+                        class="bg-red-600 cursor-pointer hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                      >
+                        Hapus
+                      </button>
+
+                      <button
+                        @click="openEditModal(request)"
+                        class="bg-blue-600 cursor-pointer hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                      >
+                        Edit
+                      </button>
                     </td>
                   </tr>
                 </tbody>
               </table>
+            </div>
+            <div class="mt-4">
+              <Paginator
+                v-model:first="first"
+                :rows="rows"
+                :totalRecords="kirimKeDatabase.pengajuanData.length"
+                :rowsPerPageOptions="[5, 10, 20, 50]"
+                @page="onPageChangeB"
+                v-if="kirimKeDatabase.pengajuanData.length > 0"
+                template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+                :class="
+                  theme.isdarkMode
+                    ? 'bg-gray-800 border-gray-700 text-white'
+                    : 'bg-white border-gray-200'
+                "
+              />
             </div>
           </div>
 
@@ -357,43 +427,137 @@
                   <label class="block text-sm font-medium text-gray-300 mb-2">Nama Barang</label>
                   <input
                     type="text"
-                    v-model="formData.namaBarang"
+                    v-model="kirimKeDatabase.formPengajuan.nama_barang"
                     class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Contoh: Beras 10kg"
                   />
                 </div>
-
-                <div class="mb-6">
+                <div class="mb-4">
+                  <label for="kategori" class="block mb-2 text-sm font-medium dark:text-white"
+                    >jenis kebutuhan</label
+                  >
+                  <select
+                    id="kategori"
+                    v-model="kirimKeDatabase.formPengajuan.jenis_barang"
+                    class="text-sm rounded-lg border focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-xs-light"
+                    required
+                  >
+                    <option disabled value="">-- Pilih jenis kebutuhan --</option>
+                    <option value="pakaian dan alas kaki">Pakaian dan alas kaki</option>
+                    <option value="buku dan alat tulis">Buku</option>
+                    <option value="peralatan dapur">Peralatan dapur</option>
+                    <option value="elektronik">Elektronik</option>
+                    <option value="furniture">Furniture</option>
+                  </select>
+                </div>
+                <div class="mb-4">
+                  <label class="block text-sm font-medium text-gray-300 mb-2">Jumlah</label>
+                  <input
+                    type="number"
+                    v-model="kirimKeDatabase.formPengajuan.jumlah"
+                    class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Contoh: Beras 10kg"
+                  />
+                </div>
+                <!-- <div class="mb-6">
                   <label class="block text-sm font-medium text-gray-300 mb-2">Upload Gambar</label>
                   <input
                     type="file"
                     accept="image/png,image/jpeg,image/jpg"
-                    @change="handleImageUpload"
+                    @change="
+                      (e) => (kirimKeDatabase.formPengajuan.gambar_barang = e.target.files[0])
+                    "
                     class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white file:cursor-pointer hover:file:bg-blue-700"
                   />
 
-                  <div v-if="formData.gambarBarang" class="mt-3">
+                  <div v-if="kirimKeDatabase.formPengajuan.gambar_barang" class="mt-3">
                     <img
-                      :src="formData.gambarBarang"
+                      :src="kirimKeDatabase.formPengajuan.gambar_barang"
                       alt="Preview"
                       class="w-32 h-32 object-cover rounded-lg border border-gray-600"
                     />
                   </div>
-                </div>
+                </div> -->
 
                 <div class="flex gap-3">
                   <button
                     @click="showModal = false"
-                    class="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors"
+                    class="flex-1 px-4 py-2 cursor-pointer bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors"
                   >
                     Batal
                   </button>
                   <button
                     @click="handleSubmit"
-                    class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                    class="flex-1 px-4 py-2 cursor-pointer bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
                   >
                     Ajukan
                   </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- End Modal -->
+          <div
+            v-if="isModalOpenEdit"
+            class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50"
+          >
+            <div class="bg-gray-800 rounded-lg shadow-2xl w-full max-w-md border border-gray-700">
+              <div class="p-6">
+                <h2 class="text-2xl font-bold text-white mb-6">Edit Barang Pengajuan</h2>
+
+                <div class="mb-4">
+                  <label class="block text-sm font-medium text-gray-300 mb-2">Nama Barang</label>
+                  <input
+                    type="text"
+                    v-model="kirimKeDatabase.formPengajuan.nama_barang"
+                    class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Contoh: Beras 10kg"
+                  />
+                </div>
+                <div class="mb-4">
+                  <label for="kategori" class="block mb-2 text-sm font-medium dark:text-white"
+                    >jenis kebutuhan</label
+                  >
+                  <select
+                    id="kategori"
+                    v-model="kirimKeDatabase.formPengajuan.jenis_barang"
+                    class="text-sm rounded-lg border focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-xs-light"
+                    required
+                  >
+                    <option disabled value="">-- Pilih jenis kebutuhan --</option>
+                    <option value="pakaian dan alas kaki">Pakaian dan alas kaki</option>
+                    <option value="buku dan alat tulis">Buku</option>
+                    <option value="peralatan dapur">Peralatan dapur</option>
+                    <option value="elektronik">Elektronik</option>
+                    <option value="furniture">Furniture</option>
+                  </select>
+                </div>
+                <div class="mb-4">
+                  <label class="block text-sm font-medium text-gray-300 mb-2">Jumlah</label>
+                  <input
+                    type="number"
+                    v-model="kirimKeDatabase.formPengajuan.jumlah"
+                    class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Contoh: 10"
+                  />
+                </div>
+
+                <div class="flex gap-3">
+                  <button
+                    @click="isModalOpenEdit = false"
+                    class="flex-1 px-4 py-2 cursor-pointer bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    @click="handleSubmitEdit"
+                    class="flex-1 px-4 py-2 cursor-pointer bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                  >
+                    Edit
+                  </button>
+                  <!-- <div class="feedbackError text-red-500 text-sm mt-2" v-if="pesanError">
+                    {{ pesanError }}
+                  </div> -->
                 </div>
               </div>
             </div>
@@ -403,8 +567,17 @@
       </div>
     </main>
   </div>
-
-  <ModalLogout :token="'token_penerima'" :isOpen="isOpenModal" @close="isOpenModal = false" />
+  <ModalDeleteData
+    v-if="isModelOpenDelete"
+    :isOpen="isModelOpenDelete"
+    :urlDelete="API_CONFIG.url"
+    :token="API_CONFIG.token"
+    :dataId="selectedItemId"
+    :itemName="selectedItemName"
+    @close="closeDeleteModal"
+    @success="handleDeleteSuccess"
+  />
+  <ModalLogout :isOpen="isOpenModal" @close="isOpenModal = false" />
 </template>
 
 <script setup>
@@ -417,6 +590,7 @@ import {
   Send,
   Heart,
   Package,
+  Plus,
   Users,
   LogOut,
   Clock,
@@ -431,66 +605,113 @@ import {
 import { useBarang } from '@/store/barang'
 import { useDonatur } from '@/store/donatur'
 import { useDataDonasi } from '@/store/dataDonasi'
-const requests = ref([
-  {
-    id: 'REQ001',
-    namaBarang: 'Beras 10kg',
-    gambarBarang:
-      'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=100&h=100&fit=crop',
-    tanggalPengajuan: '2024-11-15',
-    tanggalApprove: '2024-11-16',
-    tanggalReject: null,
-    status: 'approved',
-    pesanPenolakan: null,
-  },
-  {
-    id: 'REQ002',
-    namaBarang: 'Minyak Goreng 2L',
-    gambarBarang:
-      'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=100&h=100&fit=crop',
-    tanggalPengajuan: '2024-11-18',
-    tanggalApprove: null,
-    tanggalReject: null,
-    status: 'pending',
-    pesanPenolakan: null,
-  },
-  {
-    id: 'REQ003',
-    namaBarang: 'Paket Sembako',
-    gambarBarang: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=100&h=100&fit=crop',
-    tanggalPengajuan: '2024-11-10',
-    tanggalApprove: null,
-    tanggalReject: '2024-11-12',
-    status: 'rejected',
-    pesanPenolakan: 'Stok barang sedang habis, silakan ajukan kembali bulan depan',
-  },
-])
+import { usePengajuanPenerimaStore } from '@/store/pengajuanPenerima'
+import ModalDeleteData from '@/components/Modal/ModalDeleteData.vue'
+import { useTheme } from '@/store/themeStore'
+import { useAuth } from '@/store/auth'
 
+const isModelOpenDelete = ref(false)
+const selectedItemId = ref(null)
+const isModalOpenEdit = ref(false)
+const theme = useTheme()
+const auth = useAuth()
+const selectedItemName = ref('')
 const showModal = ref(false)
-const formData = ref({
-  namaBarang: '',
-  gambarBarang: '',
-})
+const API_CONFIG = {
+  url: 'http://localhost:5000/pengajuan/api/delete/pengajuan_barang/',
+  token: localStorage.getItem('token_penerima'),
+}
 
-const handleSubmit = () => {
-  if (!formData.value.namaBarang.trim()) return
+const openDeleteModal = (item) => {
+  selectedItemId.value = item.id
+  selectedItemName.value = item.name_barang
+  isModelOpenDelete.value = true
+}
 
-  const newRequest = {
-    id: `REQ${String(requests.value.length + 1).padStart(3, '0')}`,
-    namaBarang: formData.value.namaBarang,
-    gambarBarang:
-      formData.value.gambarBarang ||
-      'https://images.unsplash.com/photo-1558769132-cb1aea19d909?w=100&h=100&fit=crop',
-    tanggalPengajuan: new Date().toISOString().split('T')[0],
-    tanggalApprove: null,
-    tanggalReject: null,
-    status: 'pending',
-    pesanPenolakan: null,
+const openEditModal = (item) => {
+  selectedItemId.value = item.id
+  kirimKeDatabase.formPengajuan = {
+    nama_barang: item.nama_barang,
+    jenis_barang: item.jenis_barang,
+    jumlah: item.jumlah,
   }
-
-  requests.value.push(newRequest)
-  formData.value = { namaBarang: '', gambarBarang: '' }
+  isModalOpenEdit.value = true
+}
+const closeDeleteModal = () => {
+  isModelOpenDelete.value = false
+  selectedItemId.value = null
+  selectedItemName.value = ''
+}
+const handleDeleteSuccess = async () => {
+  closeDeleteModal()
+  await kirimKeDatabase.getPengajuanData()
+}
+const kirimKeDatabase = usePengajuanPenerimaStore()
+// const formData = ref({
+//   nama_barang: '',
+//   gambar_barang: '',
+// })
+const nama_barangBannned = [
+  'mobil bekas',
+  'mobil',
+  'motor bekas',
+  'motor',
+  'sepeda motor',
+  'sepeda',
+  'tank',
+  'mobil tank',
+  'senjata api',
+  'senjata',
+  'bensin',
+  'narkoba',
+  'obat terlarang',
+  'bahan peledak',
+  'bom',
+  'pesawat tempur',
+  'pesawat',
+  'kapal perang',
+  'kapal selam',
+  'alat perang',
+  'helikopter tempur',
+  'helikopter',
+  'granat',
+  'peluru',
+  'amunisi',
+  'tai',
+  'kotoran',
+  'bangkai',
+  'mayat',
+  'babi',
+  'kambing',
+  'sapi',
+  'ayam',
+  'ikan',
+]
+// const pesanError = ref('')
+const handleSubmit = async () => {
+  if (
+    !kirimKeDatabase.formPengajuan.nama_barang?.trim() &&
+    !kirimKeDatabase.formPengajuan.jenis_barang?.trim()
+  ) {
+    alert('Mohon lengkapi semua field yang diperlukan.')
+    return
+  }
+  if (nama_barangBannned.includes(kirimKeDatabase.formPengajuan.nama_barang.toLowerCase().trim())) {
+    alert('Nama barang yang diajukan tidak diperbolehkan.')
+    return
+  }
+  await kirimKeDatabase.pengajuanPost()
+  kirimKeDatabase.formPengajuan = { nama_barang: '', jenis_barang: '', jumlah: '' }
   showModal.value = false
+}
+const handleSubmitEdit = async () => {
+  if (nama_barangBannned.includes(kirimKeDatabase.formPengajuan.nama_barang.toLowerCase().trim())) {
+    alert('Nama barang yang diajukan tidak diperbolehkan.')
+    return
+  }
+  await kirimKeDatabase.editdataPengajuan(selectedItemId.value)
+  // kirimKeDatabase.formPengajuan = { nama_barang: '', gambar_barang: '' }
+  isModalOpenEdit.value = false
 }
 
 const getStatusBadge = (status) => {
@@ -541,6 +762,7 @@ const donasi = useDataDonasi()
 // let interval
 onMounted(async () => {
   await barang.getDataBarangP()
+  await kirimKeDatabase.getPengajuanData('token_penerima')
   await donatur.getDataDonaturP()
   await donasi.getDataP()
   await barang.getDataBarangPR()
@@ -550,10 +772,13 @@ onMounted(async () => {
   await donasi.getKategori('elektronik')
   await donasi.getKategori('peralatan dapur')
   await donasi.getDonasiTerbaru()
-  socket.on('data_update', async (data) => {
-    console.log(data)
+  await auth.getUser()
+  socket.on('data_update', async () => {
+    // console.log(data)
     await barang.getDataBarangP()
     await donatur.getDataDonaturP()
+    await kirimKeDatabase.getPengajuanData('token_penerima')
+    await auth.getUser()
     await donasi.getDataP()
     await barang.getDataBarangPR()
     await donasi.getKategori('pakaian')
@@ -563,37 +788,28 @@ onMounted(async () => {
     await donasi.getKategori('peralatan dapur')
     await donasi.getDonasiTerbaru()
   })
-  // interval = setInterval(() => {
-  //   barang.getDataBarangP()
-  //   donatur.getDataDonaturP()
-  //   donasi.getDataP()
-  //   barang.getDataBarangPR()
-  //   donasi.getKategori('pakaian')
-  //   donasi.getKategori('buku')
-  //   donasi.getKategori('furniture')
-  //   donasi.getKategori('elektronik')
-  //   donasi.getKategori('peralatan dapur')
-  //   donasi.getDonasiTerbaru()
-  // }, 3000)
 })
 
 onUnmounted(() => socket.off('data_update'))
 
 const stats = computed(() => [
   {
+    id: 1,
     label: 'Total Barang Diterima',
-    value: barang.totalDataBarangP,
+    value: donasi.totalSelesai,
     icon: Package,
     color: 'bg-emerald-500',
   },
   {
+    id: 2,
     label: 'Total Donatur',
     value: donatur.totalDataP,
     icon: Users,
     color: 'bg-blue-500',
   },
-  { label: 'Dalam Proses', value: donasi.totalDataP, icon: Clock, color: 'bg-amber-500' },
+  { id: 3, label: 'Dalam Proses', value: donasi.totalDataP, icon: Clock, color: 'bg-amber-500' },
   {
+    id: 4,
     label: 'Barang Disalurkan',
     value: barang.totalDataBarangPR,
     icon: CheckCircle,
@@ -613,5 +829,24 @@ const totalCategories = computed(() => categories.value.reduce((acc, cat) => acc
 
 const handleLogout = () => {
   isOpenModal.value = !isOpenModal.value
+}
+const first = ref(0)
+const rows = ref(10)
+
+const paginatedDataA = computed(() => {
+  return donasi.DataDonasiTerkini.slice(first.value, first.value + rows.value)
+})
+
+const onPageChange = (event) => {
+  first.value = event.first
+  rows.value = event.rows
+}
+const paginatedDataB = computed(() => {
+  return kirimKeDatabase.pengajuanData.slice(first.value, first.value + rows.value)
+})
+
+const onPageChangeB = (event) => {
+  first.value = event.first
+  rows.value = event.rows
 }
 </script>

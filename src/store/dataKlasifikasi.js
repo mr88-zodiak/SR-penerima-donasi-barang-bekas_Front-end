@@ -11,7 +11,7 @@ export const useDataKlasifikasi = defineStore('useDataKlasifikasi', () => {
     try {
       const response = await axios.get('http://localhost:5000/klasifikasi/api/get/data', {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
       })
       // console.log(response.data)
@@ -24,7 +24,7 @@ export const useDataKlasifikasi = defineStore('useDataKlasifikasi', () => {
         tanggungan: item.jumlah_tanggungan,
         kendaraan: item.jumlah_kendaraan,
         statusTinggal: item.status_tempat_tinggal,
-        jenisKebutuhan: item.jenis_kebutuhan,
+        jenisKebutuhan: item.nama_barang,
         layak: item.layak,
       }))
 
@@ -38,10 +38,10 @@ export const useDataKlasifikasi = defineStore('useDataKlasifikasi', () => {
     try {
       const response = await axios.get('http://localhost:5000/klasifikasi/api/get/data/getData', {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token_donatur')}`,
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
       })
-      // console.log(response.data.data)
+      console.log(response.data.data)
       const data = response.data.data
         .map((item) => ({
           id: item.id,
@@ -49,15 +49,18 @@ export const useDataKlasifikasi = defineStore('useDataKlasifikasi', () => {
           kategori: item.kategori,
           status: item.status,
           jenis_kebutuhan: item.jenis_kebutuhan,
+          jumlah: item.jumlah,
           layak: item.layak,
+          terkumpul: item.donasi_terkumpul,
         }))
-        .filter((item) => item.layak === 0 && item.status === 'approved')
+        .filter((item) => item.layak === 1 && item.status === 'approved')
       klasifikasiData.splice(0, klasifikasiData.length, ...data)
+      // console.log(klasifikasiData)
     } catch (error) {
       console.error('Gagal mengambil data:', error)
     }
   }
-  const totalLayak = computed(() => dataTable.filter((item) => item.layak === 0).length)
-  const totalTidakLayak = computed(() => dataTable.filter((item) => item.layak === 1).length)
+  const totalLayak = computed(() => dataTable.filter((item) => item.layak === 1).length)
+  const totalTidakLayak = computed(() => dataTable.filter((item) => item.layak === 0).length)
   return { dataTable, getData, getDataD, klasifikasiData, totalLayak, totalTidakLayak }
 })

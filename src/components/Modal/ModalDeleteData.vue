@@ -17,8 +17,9 @@ const theme = useTheme()
 
 const deleteData = async () => {
   try {
+    const token = localStorage.getItem('auth_token')
     const respon = await axios.delete(`${props.urlDelete}${props.dataId}`, {
-      headers: { Authorization: `Bearer ${props.token}` },
+      headers: { Authorization: `Bearer ${token}` },
     })
     if (respon.status === 200) {
       alert(respon.data.message)
@@ -46,7 +47,7 @@ const deleteData = async () => {
           <!-- Tombol close -->
           <button
             type="button"
-            class="absolute top-3 end-2.5 text-gray-400 hover:text-gray-900"
+            class="absolute top-3 end-2.5 cursor-pointer text-gray-400 hover:text-gray-900"
             data-modal-hide="popup-modal"
             @click="$emit('close')"
           >

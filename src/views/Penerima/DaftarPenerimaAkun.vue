@@ -25,7 +25,7 @@ const auth = useAuth()
                   >Nama</label
                 >
                 <input
-                  v-model="auth.formDataRegisterPenerima.name"
+                  v-model="auth.formDataRegister.name"
                   type="text"
                   id="nama"
                   placeholder="your name"
@@ -42,7 +42,7 @@ const auth = useAuth()
                   >Email</label
                 >
                 <input
-                  v-model="auth.formDataRegisterPenerima.email"
+                  v-model="auth.formDataRegister.email"
                   type="email"
                   id="email"
                   placeholder="test@example.com"
@@ -59,7 +59,7 @@ const auth = useAuth()
                   >Username</label
                 >
                 <input
-                  v-model="auth.formDataRegisterPenerima.username"
+                  v-model="auth.formDataRegister.username"
                   type="text"
                   id="username"
                   placeholder="your username"
@@ -76,7 +76,7 @@ const auth = useAuth()
                   >Password</label
                 >
                 <input
-                  v-model="auth.formDataRegisterPenerima.password"
+                  v-model="auth.formDataRegister.password"
                   type="password"
                   id="password"
                   placeholder="••••••••"
@@ -90,10 +90,10 @@ const auth = useAuth()
                 type="submit"
                 :disabled="!auth.isFormValidPenerimaRegister"
                 :class="
-                  !auth.formDataRegisterPenerima.email ||
-                  !auth.formDataRegisterPenerima.name ||
-                  !auth.formDataRegisterPenerima.username ||
-                  !auth.formDataRegisterPenerima.password
+                  !auth.formDataRegister.email ||
+                  !auth.formDataRegister.name ||
+                  !auth.formDataRegister.username ||
+                  !auth.formDataRegister.password
                     ? 'opacity-50 cursor-not-allowed bg-blue-600'
                     : 'cursor-pointer bg-blue-600 hover:bg-blue-700 focus:ring-4 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800'
                 "

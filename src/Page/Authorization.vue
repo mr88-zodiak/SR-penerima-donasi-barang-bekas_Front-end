@@ -1,12 +1,13 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup>
 import Search_action from '@/components/Search_action.vue'
-import { onMounted, onUnmounted } from 'vue'
+import { computed, onMounted, onUnmounted } from 'vue'
 import { usePenerima } from '@/store/penerima'
 import { useTheme } from '@/store/themeStore'
 import Loading from 'vue-loading-overlay'
 import 'vue-loading-overlay/dist/css/index.css'
 import socket from '@/plugins/socket'
+import { ref } from 'vue'
 const penerima = usePenerima()
 const theme = useTheme()
 
@@ -17,6 +18,12 @@ onMounted(async () => {
     await penerima.getDataRole(false)
   })
 })
+const roleStyle = (item) => {
+  if (item.role === 'admin') return 'font-bold text-yellow-500'
+  if (item.role === 'penerima') return 'font-bold text-purple-500'
+  if (item.role === 'donatur') return 'font-bold text-blue-500'
+  return ''
+}
 onUnmounted(() => socket.off('data_update'))
 const cekStatus = (status) => {
   if (status === 'rejected') return 'text-red-500'
@@ -24,134 +31,162 @@ const cekStatus = (status) => {
   if (status === 'pending') return 'text-yellow-400'
   return ''
 }
+const first = ref(0)
+const rows = ref(10)
+
+const paginatedData = computed(() => {
+  return penerima.dataRole.slice(first.value, first.value + rows.value)
+})
+
+const onPageChange = (event) => {
+  first.value = event.first
+  rows.value = event.rows
+}
 </script>
 
 <template>
   <div
-    class="penerima w-full h-screen bg-gray-100 p-4"
-    :class="{ 'dark:bg-gray-800': theme.isdarkMode }"
+    class="penerima w-full min-h-screen p-4 transition-colors duration-300"
+    :class="theme.isdarkMode ? 'dark:bg-gray-900' : 'bg-gray-50'"
   >
     <Search_action />
-    <div class="relative overflow-x-auto">
-      <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+
+    <div
+      class="mt-6 relative overflow-x-auto shadow-md rounded-xl border border-gray-200 dark:border-gray-700"
+    >
+      <table class="w-full text-xs text-left text-gray-500 dark:text-gray-400">
         <thead
-          class="text-xs"
-          :class="
-            theme.isdarkMode ? 'dark:bg-gray-700 dark:text-gray-400' : 'bg-gray-50 text-gray-700'
-          "
+          class="text-[11px] uppercase tracking-wider border-b border-gray-200 dark:border-gray-700"
+          :class="theme.isdarkMode ? 'bg-gray-800 text-gray-400' : 'bg-white text-gray-600'"
         >
           <tr>
-            <th scope="col" class="px-6 py-3 uppercase">#id</th>
-            <th scope="col" class="px-6 py-3 uppercase">nama</th>
-            <th scope="col" class="px-6 py-3 uppercase">email</th>
-            <th scope="col" class="px-6 py-3 uppercase">username</th>
-            <th scope="col" class="px-6 py-3 uppercase">role</th>
-            <th scope="col" class="px-6 py-3 uppercase">status</th>
-            <th scope="col" class="px-6 py-3 uppercase">approved date</th>
-            <th scope="col" class="px-6 py-3 uppercase">rejected date</th>
-
+            <th scope="col" class="px-6 py-4">#ID</th>
+            <th scope="col" class="px-6 py-4">Profil Pengguna</th>
+            <th scope="col" class="px-6 py-4">Username</th>
+            <th scope="col" class="px-6 py-4">Role & Status</th>
+            <th scope="col" class="px-6 py-4">Aktivitas Tanggal</th>
             <th
               scope="col"
-              class="px-6 py-3 uppercase"
+              class="px-6 py-4 text-center"
               v-if="penerima.dataRole.some((item) => item.status === 'pending')"
             >
-              action
+              Konfirmasi
             </th>
           </tr>
         </thead>
-        <tbody>
+
+        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
           <tr
-            class="border-b"
-            :class="
-              theme.isdarkMode
-                ? 'dark:bg-gray-800 dark:border-gray-700'
-                : 'border-gray-200 bg-white'
-            "
-            v-for="item in penerima.dataRole"
+            v-for="(item, id) in paginatedData"
             :key="item.no"
+            class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50"
+            :class="theme.isdarkMode ? 'bg-gray-800' : 'bg-white'"
           >
-            <th
-              scope="row"
-              class="px-6 py-4 font-medium whitespace-nowrap"
-              :class="theme.isdarkMode ? 'dark:text-white' : 'text-gray-900'"
-            >
-              {{ item.no }}
-            </th>
-            <td class="px-6 py-4 text-black" :class="{ 'dark:text-white': theme.isdarkMode }">
-              {{ item.nama }}
+            <td class="px-6 py-4 font-bold text-gray-900 dark:text-white">
+              {{ id + 1 }}
             </td>
-            <td class="px-6 py-4 text-black" :class="{ 'dark:text-white': theme.isdarkMode }">
-              {{ item.email }}
+
+            <td class="px-6 py-4">
+              <div class="font-semibold text-gray-900 dark:text-white">{{ item.nama }}</div>
+              <div class="text-[10px] opacity-60 lowercase">{{ item.email }}</div>
             </td>
-            <td class="px-6 py-4 text-black" :class="{ 'dark:text-white': theme.isdarkMode }">
-              {{ item.username }}
+
+            <td class="px-6 py-4 font-medium text-blue-600 dark:text-blue-400">
+              @{{ item.username }}
             </td>
-            <td class="px-6 py-4 text-black" :class="{ 'dark:text-white': theme.isdarkMode }">
-              {{ item.role }}
-            </td>
-            <td class="px-6 py-4 text-black" :class="cekStatus(item.status)">
-              <span v-if="['penerima', 'donatur'].includes(item.role)">
+
+            <td class="px-6 py-4">
+              <div class="mb-1">
+                <span
+                  class="px-2 py-0.5 rounded text-[10px] font-bold uppercase"
+                  :class="roleStyle(item)"
+                >
+                  {{ item.role }}
+                </span>
+              </div>
+              <div
+                v-if="['penerima', 'donatur'].includes(item.role)"
+                class="text-[10px] font-medium"
+                :class="cekStatus(item.status)"
+              >
                 {{ item.status }}
-              </span>
+              </div>
             </td>
-            <td class="px-6 py-4 text-black" :class="{ 'dark:text-white': theme.isdarkMode }">
-              <span v-if="['penerima', 'donatur'].includes(item.role)">
-                {{ item.approved }}
-              </span>
-            </td>
-            <td class="px-6 py-4 text-black" :class="{ 'dark:text-white': theme.isdarkMode }">
-              <span v-if="['penerima', 'donatur'].includes(item.role)">
-                {{ item.rejected }}
-              </span>
-            </td>
-            <td
-              class="px-6 py-4 flex items-center space-x-2"
-              v-if="['penerima', 'donatur'].includes(item.role) && item.status === 'pending'"
-            >
-              <button
-                class="text-white p-2 rounded dark:bg-blue-500 dark:hover:bg-blue-600 cursor-pointer"
-                @click="penerima.approved(item.no)"
+
+            <td class="px-6 py-4 text-[10px] space-y-1">
+              <div
+                v-if="item.approved && ['penerima', 'donatur'].includes(item.role)"
+                class="text-green-600 dark:text-green-400 flex items-center"
               >
-                approved
-              </button>
-              <button
-                id="popup-modal"
-                class="text-white p-2 rounded dark:bg-red-500 dark:hover:bg-red-600 cursor-pointer"
-                @click="penerima.rejected(item.no)"
-                data-modal-target="popup-modal"
-                data-modal-toggle="popup-modal"
+                <span class="w-12 opacity-60">Acc:</span>
+                <span>{{ item.approved }}</span>
+              </div>
+              <div
+                v-if="item.rejected && ['penerima', 'donatur'].includes(item.role)"
+                class="text-red-500 flex items-center"
               >
-                rejected
-              </button>
+                <span class="w-12 opacity-60">Rej:</span>
+                <span>{{ item.rejected }}</span>
+              </div>
+              <div v-if="!item.approved && !item.rejected" class="text-gray-400 italic">
+                No activity
+              </div>
+            </td>
+
+            <td class="px-6 py-4" v-if="penerima.dataRole.some((r) => r.status === 'pending')">
+              <div
+                class="flex items-center justify-center space-x-2"
+                v-if="['penerima', 'donatur'].includes(item.role) && item.status === 'pending'"
+              >
+                <button
+                  @click="penerima.approved(item.no)"
+                  class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-[10px] font-bold transition-all active:scale-95 uppercase"
+                >
+                  Approve
+                </button>
+                <button
+                  @click="penerima.rejected(item.no)"
+                  class="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded text-[10px] font-bold transition-all active:scale-95 uppercase"
+                >
+                  Reject
+                </button>
+              </div>
             </td>
           </tr>
+
           <tr v-if="penerima.totalDataRole === 0">
-            <td
-              class="text-center py-8 text-gray-500"
-              :class="{ 'dark:text-gray-400': theme.isdarkMode }"
-              colspan="6"
-            >
-              <div class="flex flex-col items-center space-y-2">
-                <svg
-                  class="w-12 h-12 text-gray-300"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
+            <td class="text-center py-16" colspan="6">
+              <div class="flex flex-col items-center opacity-30">
+                <svg class="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
                     stroke-width="2"
-                    d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2 2v-5m16 0h-8m0 0V9m0 4h8m-8 0l4-4m0 0l4 4"
+                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
                   />
                 </svg>
-                <p>Akun belum ditambahkan :)</p>
+                <p class="text-xs font-bold uppercase tracking-widest">Akun belum ditambahkan</p>
               </div>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
+    <div class="mt-4">
+      <Paginator
+        v-model:first="first"
+        :rows="rows"
+        :totalRecords="penerima.dataRole.length"
+        :rowsPerPageOptions="[5, 10, 20, 50]"
+        @page="onPageChange"
+        v-if="penerima.dataRole.length > 0"
+        template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+        :class="
+          theme.isdarkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-gray-200'
+        "
+      />
+    </div>
   </div>
+
   <Loading v-model:active="penerima.isLoading" :is-full-page="true" :lock-scroll="true" />
 </template>

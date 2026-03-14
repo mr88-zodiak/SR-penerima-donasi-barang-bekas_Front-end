@@ -19,7 +19,7 @@ const props = defineProps({
   },
   token: {
     type: String,
-    default: 'token',
+    default: 'auth_token',
   },
 })
 

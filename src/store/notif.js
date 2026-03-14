@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { defineStore } from 'pinia'
-import { computed, reactive } from 'vue'
+import { computed, reactive, ref } from 'vue'
 
 export const useNotif = defineStore('notif', () => {
   const formData = reactive({
@@ -15,7 +15,7 @@ export const useNotif = defineStore('notif', () => {
         {
           headers: {
             // ⬅️ ini harus lowercase
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
           },
         },
       )
@@ -26,12 +26,13 @@ export const useNotif = defineStore('notif', () => {
     }
   }
 
-  const notifData = reactive([])
+  let notifData = reactive([])
+  const unreadCount = ref(0)
   const getCallback = async () => {
     try {
       const response = await axios.get('http://localhost:5000/notif/api/get/notif', {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token_donatur')}`,
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
       })
       // console.log(response.data.notifications)
@@ -44,11 +45,16 @@ export const useNotif = defineStore('notif', () => {
           }
         })
         .filter((item) => item.status !== 'pending')
-      notifData.splice(0, notifData.length, ...data) // Update reactive array
+      notifData.splice(0, notifData.length, ...data)
+      unreadCount.value = data.length
     } catch (e) {
       console.error('Gagal mengambil notifikasi:', e)
     }
   }
-  const getTotalnotif = computed(() => notifData.length)
-  return { rejectCallback, getCallback, formData, notifData, getTotalnotif }
+  const resetNotif = () => {
+    unreadCount.value = 0
+  }
+
+  const getTotalnotif = computed(() => unreadCount.value)
+  return { rejectCallback, getCallback, formData, notifData, getTotalnotif, resetNotif }
 })

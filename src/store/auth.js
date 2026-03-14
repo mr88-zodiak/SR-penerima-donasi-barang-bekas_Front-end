@@ -11,6 +11,8 @@ export const useAuth = defineStore('auth', () => {
     email: '',
     password: '',
   })
+  const errorMessage = ref(null)
+  const pesanError = ref('')
   const isFormValidLogin = computed(() => formLogin.value.email && formLogin.value.password)
   const Login = async () => {
     try {
@@ -23,22 +25,23 @@ export const useAuth = defineStore('auth', () => {
           },
         },
       )
-      // console.log(respon)
       if (respon.status === 200) {
         const token = respon.data.access_token
         const dataDiriId = respon.data.user.dataDiriId
-        // localStorage.setItem('token', token)
         switch (respon.data.user.role) {
           case 'admin':
             router.push({ name: 'dashboard' })
-            localStorage.setItem('token', token)
+            localStorage.setItem('auth_token', token)
+            localStorage.setItem('role', respon.data.user.role)
             break
           case 'donatur':
             router.push({ name: 'DonaturHome' })
-            localStorage.setItem('token_donatur', token)
+            localStorage.setItem('auth_token', token)
+            localStorage.setItem('role', respon.data.user.role)
             break
           case 'penerima':
-            localStorage.setItem('token_penerima', token)
+            localStorage.setItem('auth_token', token)
+            localStorage.setItem('role', respon.data.user.role)
             if (dataDiriId !== null) {
               router.push({ name: 'PenerimaHome' })
             } else {
@@ -46,10 +49,11 @@ export const useAuth = defineStore('auth', () => {
             }
             break
         }
+      } else {
+        alert(respon.data.message)
       }
     } catch (e) {
-      // console.log(e)
-      alert(e.response.message) || alert(e.response.data.message)
+      errorMessage.value = e.response?.data?.message || 'Terjadi kesalahan'
     }
   }
 
@@ -102,8 +106,7 @@ export const useAuth = defineStore('auth', () => {
     kendaraan: '',
     status_tempat_tinggal: '',
     kategori: '',
-    jenis_kebutuhan: '',
-    jumlah: '',
+    alamat: '',
   })
   const personalRegister = async () => {
     try {
@@ -129,16 +132,16 @@ export const useAuth = defineStore('auth', () => {
       formDataPersonalRegister.value.tanggungan === '' ||
       formDataPersonalRegister.value.kendaraan === '' ||
       formDataPersonalRegister.value.status_tempat_tinggal === '' ||
-      formDataPersonalRegister.value.jenis_kebutuhan === '' ||
-      formDataPersonalRegister.value.nama_barang === ''
+      formDataPersonalRegister.value.alamat === ''
     )
   })
   const getUsername = ref('')
   const getUser = async () => {
     try {
+      const token = localStorage.getItem('auth_token')
       const response = await axios.get('http://localhost:5000/user/api/get/username', {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token_donatur')}`,
+          Authorization: `Bearer ${token}`,
         },
       })
       // console.log(response.data)
@@ -152,6 +155,7 @@ export const useAuth = defineStore('auth', () => {
     isFormValidLogin,
     isFormValidRegister,
     isFormValidPersonal,
+    pesanError,
     formDataPersonalRegister,
     formDataRegister,
     getUsername,
@@ -160,5 +164,6 @@ export const useAuth = defineStore('auth', () => {
     Register,
     getUser,
     Login,
+    errorMessage,
   }
 })

@@ -8,6 +8,7 @@ import { useTheme } from '@/store/themeStore'
 const props = defineProps({
   isOpen: Boolean,
   id: Number,
+  role: String,
 })
 
 const emits = defineEmits(['close', 'updated'])
@@ -17,29 +18,29 @@ const formData = ref({
   email: '',
   username: '',
   password: '',
-  role: '',
+  role: props.role,
 })
 console.log(formData)
 
-const disableButton = computed(
-  () =>
-    !formData.value.name ||
-    !formData.value.email ||
-    !formData.value.username ||
-    !formData.value.password,
-)
+// const disableButton = computed(
+//   () =>
+//     !formData.value.name ||
+//     !formData.value.email ||
+//     !formData.value.username ||
+//     !formData.value.password,
+// )
 
 const theme = useTheme()
 
 const UpdatePenerima = async () => {
   try {
-    const respon = await axios.put(
+    const respon = await axios.patch(
       `http://localhost:5000/user/api/put/update/${props.id}`,
       formData.value,
       {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
       },
     )
@@ -82,11 +83,15 @@ const UpdatePenerima = async () => {
               type="text"
               id="nama"
               placeholder="Enter your nickname"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              required
+              class="border text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              :class="
+                theme.isdarkMode
+                  ? 'dark:bg-gray-700 dark:border-gray-600'
+                  : 'bg-gray-50 border-gray-300'
+              "
             />
           </div>
-          <div>
+          <!-- <div>
             <label for="nama" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
               >Jenis akun</label
             >
@@ -96,7 +101,7 @@ const UpdatePenerima = async () => {
             >
               <option value="donatur">donatur</option>
             </select>
-          </div>
+          </div> -->
 
           <!-- Email -->
           <div>
@@ -108,8 +113,12 @@ const UpdatePenerima = async () => {
               type="email"
               id="email"
               placeholder="test@example.com"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              required
+              class="border text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              :class="
+                theme.isdarkMode
+                  ? 'dark:bg-gray-700 dark:border-gray-600'
+                  : 'bg-gray-50 border-gray-300'
+              "
             />
           </div>
 
@@ -126,7 +135,6 @@ const UpdatePenerima = async () => {
               id="username"
               placeholder="your username"
               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              required
             />
           </div>
 
@@ -144,20 +152,13 @@ const UpdatePenerima = async () => {
               minlength="6"
               placeholder="••••••••"
               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              required
             />
           </div>
 
           <!-- Button -->
           <button
             type="submit"
-            :disabled="disableButton"
-            :class="[
-              'w-full text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center focus:outline-none',
-              disableButton
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-blue-600 hover:bg-blue-700 focus:ring-4 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800',
-            ]"
+            class="'w-full cursor-pointer text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center focus:outline-none',"
           >
             Submit
           </button>

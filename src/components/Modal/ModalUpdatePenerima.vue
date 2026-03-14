@@ -17,28 +17,28 @@ const formData = ref({
   email: '',
   username: '',
   password: '',
-  role: '',
+  role: 'penerima',
 })
 
-const disableButton = computed(
-  () =>
-    !formData.value.name ||
-    !formData.value.email ||
-    !formData.value.username ||
-    !formData.value.password,
-)
+// const disableButton = computed(
+//   () =>
+//     !formData.value.name ||
+//     !formData.value.email ||
+//     !formData.value.username ||
+//     !formData.value.password,
+// )
 
 const theme = useTheme()
 
 const UpdatePenerima = async () => {
   try {
-    const respon = await axios.put(
+    const respon = await axios.patch(
       `http://localhost:5000/user/api/put/update/${props.id}`,
       formData.value,
       {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
       },
     )
@@ -82,19 +82,7 @@ const UpdatePenerima = async () => {
               id="nama"
               placeholder="Enter your nickname"
               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              required
             />
-          </div>
-          <div>
-            <label for="nama" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-              >Jenis akun</label
-            >
-            <select
-              v-model="formData.role"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            >
-              <option value="penerima">penerima</option>
-            </select>
           </div>
 
           <!-- Email -->
@@ -108,7 +96,6 @@ const UpdatePenerima = async () => {
               id="email"
               placeholder="test@example.com"
               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              required
             />
           </div>
 
@@ -125,7 +112,6 @@ const UpdatePenerima = async () => {
               id="username"
               placeholder="your username"
               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              required
             />
           </div>
 
@@ -143,20 +129,13 @@ const UpdatePenerima = async () => {
               minlength="6"
               placeholder="••••••••"
               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              required
             />
           </div>
 
           <!-- Button -->
           <button
             type="submit"
-            :disabled="disableButton"
-            :class="[
-              'w-full text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center focus:outline-none',
-              disableButton
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-blue-600 hover:bg-blue-700 focus:ring-4 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800',
-            ]"
+            class="'w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 cursor-pointer font-medium rounded-lg text-sm px-5 py-2.5 text-center focus:outline-none',"
           >
             Submit
           </button>

@@ -7,6 +7,7 @@ import { useDonatur } from '@/store/donatur'
 import { useTheme } from '@/store/themeStore'
 import socket from '@/plugins/socket'
 import ModalUpdateDonatur from '@/components/Modal/ModalUpdateDonatur.vue'
+import { computed } from 'vue'
 const donatur = useDonatur()
 const isModelOpen = ref(false)
 const theme = useTheme()
@@ -14,7 +15,7 @@ const selectedItemId = ref(null)
 const isUpdateModal = ref(false)
 const selectedItemName = ref('')
 const API_CONFIG = {
-  url: 'http://localhost:5000/penerima/api/delete/donatur/',
+  url: 'http://localhost:5000/user/api/delete/donatur/',
   token: localStorage.getItem('token'),
 }
 
@@ -48,96 +49,105 @@ const handleDeleteSuccess = async () => {
   closeDeleteModal()
   await donatur.getDataDonatur()
 }
+const first = ref(0)
+const rows = ref(10)
+
+const paginatedData = computed(() => {
+  return donatur.tableDataDonatur.slice(first.value, first.value + rows.value)
+})
+
+const onPageChange = (event) => {
+  first.value = event.first
+  rows.value = event.rows
+}
 </script>
 
 <template>
   <div
-    class="donatur w-full h-screen bg-gray-100 p-4"
-    :class="{ 'dark:bg-gray-800': theme.isdarkMode }"
+    class="donatur w-full min-h-screen p-4 transition-colors duration-300"
+    :class="theme.isdarkMode ? 'dark:bg-gray-900' : 'bg-gray-50'"
   >
     <Search_action :displayC="'flex'" :display="'flex'" :role="'donatur'" />
-    <div class="relative overflow-x-auto">
-      <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+
+    <div
+      class="mt-6 relative overflow-x-auto shadow-md rounded-xl border border-gray-200 dark:border-gray-700"
+    >
+      <table class="w-full text-xs text-left text-gray-500 dark:text-gray-400">
         <thead
-          class="text-xs"
-          :class="
-            theme.isdarkMode ? 'dark:bg-gray-700 dark:text-gray-400' : 'bg-gray-50 text-gray-700'
-          "
+          class="text-[11px] uppercase tracking-wider border-b border-gray-200 dark:border-gray-700"
+          :class="theme.isdarkMode ? 'bg-gray-800 text-gray-400' : 'bg-white text-gray-600'"
         >
           <tr>
-            <th scope="col" class="px-6 py-3 uppercase">#id</th>
-            <th scope="col" class="px-6 py-3 uppercase">nama</th>
-            <th scope="col" class="px-6 py-3 uppercase">email</th>
-            <th scope="col" class="px-6 py-3 uppercase">username</th>
-            <th scope="col" class="px-6 py-3 uppercase">password</th>
-            <th scope="col" class="px-6 py-3 uppercase">tanggal login</th>
-            <th scope="col" class="px-6 py-3 uppercase">tanggal daftar</th>
-            <th scope="col" class="px-6 py-3 uppercase" v-if="donatur.totalData > 0">action</th>
+            <th scope="col" class="px-6 py-4">#id</th>
+            <th scope="col" class="px-6 py-4">Informasi Donatur</th>
+            <th scope="col" class="px-6 py-4">Username</th>
+            <th scope="col" class="px-4 py-4">Aktivitas</th>
+            <th
+              scope="col"
+              class="px-6 py-4"
+              v-if="donatur.tableDataDonatur.some((e) => e.edit_stamp !== null)"
+            >
+              Terakhir Edit
+            </th>
+            <th scope="col" class="px-6 py-4 text-center" v-if="donatur.totalData > 0">Action</th>
           </tr>
         </thead>
-        <tbody>
+
+        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
           <tr
-            class="border-b"
-            :class="
-              theme.isdarkMode
-                ? 'dark:bg-gray-800 dark:border-gray-700'
-                : 'border-gray-200 bg-white'
-            "
-            v-for="item in donatur.tableDataDonatur"
+            class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50"
+            :class="theme.isdarkMode ? 'bg-gray-800' : 'bg-white'"
+            v-for="(item, id) in paginatedData"
             :key="item.id"
           >
-            <th
-              scope="row"
-              class="px-6 py-4 font-medium whitespace-nowrap"
-              :class="theme.isdarkMode ? 'dark:text-white' : 'text-gray-900'"
-            >
-              {{ item.id }}
+            <th scope="row" class="px-6 py-4 font-bold text-gray-900 dark:text-white">
+              {{ id + 1 }}
             </th>
-            <td class="px-6 py-4 text-black" :class="{ 'dark:text-white': theme.isdarkMode }">
-              {{ item.nama }}
+
+            <td class="px-6 py-4">
+              <div class="font-semibold text-gray-900 dark:text-white">{{ item.nama }}</div>
+              <div class="text-[10px] opacity-60 lowercase">{{ item.email }}</div>
             </td>
-            <td class="px-6 py-4 text-black" :class="{ 'dark:text-white': theme.isdarkMode }">
-              {{ item.email }}
+
+            <td class="px-6 py-4 font-medium">@{{ item.username }}</td>
+
+            <td class="px-4 py-4 text-[10px] leading-tight">
+              <div class="mb-1 text-blue-600 dark:text-blue-400">Masuk: {{ item.login }}</div>
+              <div class="opacity-60">Daftar: {{ item.register }}</div>
             </td>
-            <td class="px-6 py-4 text-black" :class="{ 'dark:text-white': theme.isdarkMode }">
-              {{ item.username }}
+
+            <td class="px-6 py-4 text-[10px]" v-if="item.edit_stamp !== null">
+              {{ item.edit_stamp }}
             </td>
-            <td class="px-6 py-4 text-black" :class="{ 'dark:text-white': theme.isdarkMode }">
-              {{ item.password }}
-            </td>
-            <td class="px-6 py-4 text-black" :class="{ 'dark:text-white': theme.isdarkMode }">
-              {{ item.login }}
-            </td>
-            <td class="px-6 py-4 text-black" :class="{ 'dark:text-white': theme.isdarkMode }">
-              {{ item.register }}
-            </td>
-            <td class="px-6 py-4 flex items-center space-x-2" v-if="donatur.totalData > 0">
-              <button
-                class="text-white p-2 rounded dark:bg-blue-500 dark:hover:bg-blue-600 cursor-pointer"
-                @click="OpenModalUpdate(item)"
-              >
-                Edit
-              </button>
-              <button
-                id="popup-modal"
-                class="text-white p-2 rounded dark:bg-red-500 dark:hover:bg-red-600 cursor-pointer"
-                @click="openDeleteModal(item)"
-                data-modal-target="popup-modal"
-                data-modal-toggle="popup-modal"
-              >
-                Delete
-              </button>
+
+            <td class="px-6 py-4" v-if="donatur.totalData > 0">
+              <div class="flex items-center justify-center space-x-2">
+                <button
+                  class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-[10px] font-medium transition-all active:scale-95 cursor-pointer shadow-sm"
+                  @click="OpenModalUpdate(item)"
+                >
+                  Edit
+                </button>
+                <button
+                  id="popup-modal"
+                  class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-[10px] font-medium transition-all active:scale-95 cursor-pointer shadow-sm"
+                  @click="openDeleteModal(item)"
+                >
+                  Delete
+                </button>
+              </div>
             </td>
           </tr>
+
           <tr v-if="donatur.totalData === 0">
             <td
-              class="text-center py-8 text-gray-500"
+              class="text-center py-12 text-gray-500"
               :class="{ 'dark:text-gray-400': theme.isdarkMode }"
               colspan="6"
             >
-              <div class="flex flex-col items-center space-y-2">
+              <div class="flex flex-col items-center space-y-3">
                 <svg
-                  class="w-12 h-12 text-gray-300"
+                  class="w-16 h-16 text-gray-300 dark:text-gray-700"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -145,17 +155,32 @@ const handleDeleteSuccess = async () => {
                   <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
-                    stroke-width="2"
+                    stroke-width="1.5"
                     d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2 2v-5m16 0h-8m0 0V9m0 4h8m-8 0l4-4m0 0l4 4"
                   />
                 </svg>
-                <p>Akun donatur belum ditambahkan :)</p>
+                <p class="text-sm font-medium">Akun donatur belum ditambahkan :)</p>
               </div>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
+    <div class="mt-4">
+      <Paginator
+        v-model:first="first"
+        :rows="rows"
+        :totalRecords="donatur.tableDataDonatur.length"
+        :rowsPerPageOptions="[5, 10, 20, 50]"
+        @page="onPageChange"
+        v-if="donatur.tableDataDonatur.length > 0"
+        template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+        :class="
+          theme.isdarkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-gray-200'
+        "
+      />
+    </div>
+
     <DeleteData
       v-if="isModelOpen"
       :isOpen="isModelOpen"
@@ -166,7 +191,12 @@ const handleDeleteSuccess = async () => {
       @close="closeDeleteModal"
       @success="handleDeleteSuccess"
     />
-    <ModalUpdateDonatur :isOpen="isUpdateModal" @close="CloseModalUpdate" :id="selectedItemId" />
+    <ModalUpdateDonatur
+      :isOpen="isUpdateModal"
+      @close="CloseModalUpdate"
+      :id="selectedItemId"
+      :role="'donatur'"
+    />
   </div>
 </template>
 <style scoped>

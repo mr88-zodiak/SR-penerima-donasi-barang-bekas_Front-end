@@ -19,6 +19,7 @@ import { useDataKlasifikasi } from '@/store/dataKlasifikasi'
 import { useAuth } from '@/store/auth'
 import { useNotif } from '@/store/notif'
 import { useDataDonasi } from '@/store/dataDonasi'
+import { useBarang } from '@/store/barang'
 import socket from '@/plugins/socket'
 
 // --- State ---
@@ -33,6 +34,7 @@ const donatur = useDataKlasifikasi()
 const notif = useNotif()
 const auth = useAuth()
 const donasi = useDataDonasi()
+const barang = useBarang()
 
 // --- Computed pending donations ---
 // ambil hanya yang statusnya pending, processing, atau on_delivery
@@ -51,19 +53,27 @@ const categories = [
   { name: 'furniture', icon: Sofa },
   { name: 'elektronik', icon: Laptop },
 ]
+const handleBellClick = () => {
+  showNotifications.value = !showNotifications.value
+  if (showNotifications.value) {
+    notif.resetNotif()
+  }
+}
 
 // --- Computed filtered donations ---
 const filteredDonations = computed(() =>
-  donatur.klasifikasiData.filter((item) => {
-    const selected = selectedCategory.value.toLowerCase()
-    const itemKategori = item.kategori.toLowerCase()
-    const search = searchQuery.value.toLowerCase()
+  (donatur.klasifikasiData || []).filter((item) => {
+    const selected = (selectedCategory.value ?? '').toLowerCase()
+    const search = (searchQuery.value ?? '').toLowerCase()
+
+    const itemKategori = (item.kategori ?? '').toLowerCase()
+    const jenis = (item.jenis_kebutuhan ?? '').toLowerCase()
+    const name = (item.name ?? '').toLowerCase()
 
     const matchCategory = selected === 'semua' || itemKategori === selected
+
     const matchSearch =
-      item.jenis_kebutuhan.toLowerCase().includes(search) ||
-      item.kategori.toLowerCase().includes(search) ||
-      item.name.toLowerCase().includes(search)
+      jenis.includes(search) || itemKategori.includes(search) || name.includes(search)
 
     return matchCategory && matchSearch
   }),
@@ -100,7 +110,26 @@ onMounted(async () => {
     await notif.getCallback()
   })
 })
+const cekStatus = (status) => {
+  switch (status) {
+    case 'Barang dalam perjalanan':
+      return 'text-blue-300 bg-blue-500/20 border-blue-500/30'
+    case 'selesai':
+      return 'text-green-400 bg-green-500/20 border-green-500/30'
+    default:
+      return ''
+  }
+}
 onUnmounted(() => socket.off('data_update'))
+// let getDataTerkumpul = ref(0)
+// getDataTerkumpul = computed(() => {
+//   return donasi.riwayatDonasi.reduce((total, item) => total + (item.terkumpul || 0), 0)
+// })
+const calculateProgress = (terkumpul, jumlah) => {
+  if (!jumlah || jumlah === 0) return 0
+  return Math.min((terkumpul / jumlah) * 100, 100)
+}
+auth.SetToken = 'token_donatur'
 </script>
 
 <template>
@@ -118,7 +147,7 @@ onUnmounted(() => socket.off('data_update'))
             <!-- Notification Bell -->
             <div class="relative">
               <button
-                @click="showNotifications = !showNotifications"
+                @click="handleBellClick"
                 class="relative p-2 cursor-pointer hover:bg-gray-700 rounded-lg transition"
               >
                 <Bell class="text-gray-300 cursor-pointer" size="24" />
@@ -132,7 +161,7 @@ onUnmounted(() => socket.off('data_update'))
 
               <div
                 v-if="showNotifications"
-                class="absolute right-0 mt-2 w-80 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-[999]"
+                class="absolute right-0 mt-2 w-80 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-999"
               >
                 <div class="p-4 border-b border-gray-700 z-50">
                   <h3 class="font-semibold text-lg">Notifikasi</h3>
@@ -147,21 +176,21 @@ onUnmounted(() => socket.off('data_update'))
                       <!-- ⏰ Jika masih pending -->
                       <Clock
                         v-if="donation.status === 'pending'"
-                        class="text-yellow-400 mt-1 flex-shrink-0"
+                        class="text-yellow-400 mt-1 shrink-0"
                         size="20"
                       />
 
                       <!-- ✅ Jika sudah disetujui -->
                       <Check
                         v-else-if="donation.status === 'approved'"
-                        class="text-emerald-500 mt-1 flex-shrink-0"
+                        class="text-emerald-500 mt-1 shrink-0"
                         size="20"
                       />
 
                       <!-- ❌ Jika ditolak -->
                       <XCircle
                         v-else-if="donation.status === 'rejected'"
-                        class="text-red-500 mt-1 flex-shrink-0"
+                        class="text-red-500 mt-1 shrink-0"
                         size="20"
                       />
 
@@ -173,6 +202,11 @@ onUnmounted(() => socket.off('data_update'))
                         <p class="text-xs text-gray-500 mt-1">{{ donation.tanggal }}</p>
                       </div>
                     </div>
+                  </div>
+                </div>
+                <div class="max-h-96 overflow-y-auto" v-if="notif.notifData.length === 0">
+                  <div class="p-4">
+                    <p class="text-sm text-gray-400 text-center">Tidak ada notifikasi baru</p>
                   </div>
                 </div>
                 <div v-if="notif.getTotalnotif" class="p-3 border-t border-gray-700">
@@ -270,24 +304,55 @@ onUnmounted(() => socket.off('data_update'))
             <div
               v-for="item in filteredDonations"
               :key="item.id"
-              class="bg-gray-800 rounded-lg border border-gray-700 hover:border-emerald-500 transition p-4"
+              class="flex flex-col bg-gray-800 rounded-lg border border-gray-700 hover:border-emerald-500 transition p-4 h-full"
             >
-              <h3 class="font-semibold text-lg mb-1 text-gray-100">{{ item.jenis_kebutuhan }}</h3>
-              <p class="text-emerald-400 text-sm mb-2">{{ item.kategori }}</p>
-
-              <div class="border-t border-gray-700 pt-3 mt-3">
-                <p class="text-gray-400 text-sm">
-                  Penerima: <span class="text-gray-300">{{ item.name }}</span>
-                </p>
+              <div class="grow">
+                <h3 class="font-semibold text-lg mb-1 text-gray-100 min-h-14 line-clamp-2">
+                  {{ item.jenis_kebutuhan }}
+                </h3>
+                <p class="text-emerald-400 text-sm mb-2 capitalize">{{ item.kategori }}</p>
               </div>
 
-              <router-link :to="`/DonasiKita/donatur/donate/${item.id}/checkout`">
-                <button
-                  class="cursor-pointer w-full mt-4 bg-emerald-500 hover:bg-emerald-600 text-white py-2 rounded-lg font-medium transition"
+              <div class="mt-auto">
+                <div class="border-t border-gray-700 pt-3 mt-3">
+                  <p class="text-gray-400 text-sm">
+                    Penerima: <span class="text-gray-300">{{ item.name }}</span>
+                  </p>
+                  <div class="mt-4" id="progress-bar">
+                    <div class="flex justify-between text-xs mb-1 text-gray-400">
+                      <span>Terkumpul: {{ item.terkumpul }}</span>
+                      <span>Target: {{ item.jumlah }}</span>
+                    </div>
+
+                    <div class="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+                      <div
+                        class="bg-emerald-500 h-full transition-all duration-500 ease-out"
+                        :class="item.terkumpul > 0 ? 'bg-emerald-500' : 'bg-gray-600'"
+                        :style="{ width: calculateProgress(item.terkumpul, item.jumlah) + '%' }"
+                      ></div>
+                    </div>
+
+                    <p
+                      v-if="item.jumlah - item.terkumpul === 1"
+                      class="text-[10px] text-amber-400 mt-1 italic"
+                    >
+                      Tersisa 1 barang lagi untuk memenuhi kebutuhan!
+                    </p>
+                  </div>
+                </div>
+
+                <router-link
+                  :to="`/DonasiKita/donatur/donate/${item.id}/checkout`"
+                  @click="barang.getBarangId(item.id)"
+                  class="block w-full"
                 >
-                  Donate now
-                </button>
-              </router-link>
+                  <button
+                    class="cursor-pointer w-full mt-4 bg-emerald-500 hover:bg-emerald-600 text-white py-2 rounded-lg font-medium transition"
+                  >
+                    Donate now
+                  </button>
+                </router-link>
+              </div>
             </div>
           </div>
         </div>
@@ -334,11 +399,11 @@ onUnmounted(() => socket.off('data_update'))
               </thead>
               <tbody class="divide-y divide-gray-700">
                 <tr
-                  v-for="donation in donasi.riwayatDonasi"
+                  v-for="(donation, id) in donasi.riwayatDonasi"
                   :key="donation.id"
                   class="hover:bg-gray-750 transition"
                 >
-                  <td class="px-6 py-4 text-sm text-gray-300">#{{ donation.id }}</td>
+                  <td class="px-6 py-4 text-sm text-gray-300">{{ id + 1 }}</td>
                   <td class="px-6 py-4 text-gray-100">{{ donation.nama }}</td>
                   <td class="px-6 py-4 text-gray-100">{{ donation.nama_barang }}</td>
                   <td class="px-6 py-4 text-gray-100">{{ donation.kategori }}</td>
@@ -355,7 +420,12 @@ onUnmounted(() => socket.off('data_update'))
                   <td class="px-6 py-4 text-sm text-gray-400">{{ donation.tanggal_approve }}</td>
                   <td class="px-6 py-4 text-sm text-gray-400">{{ donation.tanggal_reject }}</td>
                   <td class="px-6 py-4 text-sm text-gray-400">{{ donation.pesan }}</td>
-                  <td class="px-6 py-4 text-sm text-gray-400">{{ donation.statusPengiriman }}</td>
+                  <td
+                    class="px-6 py-4 text-sm text-gray-400"
+                    :class="cekStatus(donation.statusPengiriman)"
+                  >
+                    {{ donation.statusPengiriman }}
+                  </td>
                 </tr>
               </tbody>
             </table>
