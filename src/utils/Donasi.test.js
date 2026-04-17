@@ -17,7 +17,6 @@ describe('Data Donasi Store', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
 
-    // mock localStorage
     vi.stubGlobal('localStorage', {
       getItem: vi.fn(() => 'fake-token'),
       setItem: vi.fn(),
@@ -68,6 +67,9 @@ describe('Data Donasi Store', () => {
 
     expect(store.tableData.length).toBe(1)
     expect(store.tableData[0].donaturName).toBe('Bima')
+    expect(store.tableData[0].kondisi).toBe('cukup baik')
+    console.log(store.tableData[0].jenisBarang)
+    expect(store.tableData[0].jenisBarang).toBe('Baju')
   })
   it('approveData memanggil API approve', async () => {
     axios.put.mockResolvedValue({
@@ -107,5 +109,7 @@ describe('Data Donasi Store', () => {
 
     expect(store.riwayatDonasi.length).toBe(1)
     expect(store.riwayatDonasi[0].nama).toBe('Bima')
+    expect(store.riwayatDonasi[0].nama_barang).toBe('Laptop')
+    expect(store.riwayatDonasi[0].kondisi).toBe('bekas')
   })
 })

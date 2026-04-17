@@ -1,0 +1,27 @@
+name: Unit Testing CI
+
+on:
+  push:
+    branches: ['main', 'master'] # Jalankan saat push ke main
+  pull_request:
+    branches: ['main', 'master'] # Jalankan saat ada PR
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout kode
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Sesuaikan dengan versi Node kamu
+          cache: 'npm'
+
+      - name: Install Dependensi
+        run: npm install
+
+      - name: Jalankan Unit Test
+        run: npm test # Pastikan di package.json, "test" menjalankan vitest/jest

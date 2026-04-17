@@ -65,7 +65,7 @@ onUnmounted(() => {
 })
 
 watch(
-  () => [barang.totalDataBarang, donatur.totalData, penerima.totalDataPenerima],
+  () => [barang.totalDataBarang, donatur.jumlahDonatur, penerima.jumlahPenerima],
   ([b, d, p]) => {
     if (stats.length < 3) return
 

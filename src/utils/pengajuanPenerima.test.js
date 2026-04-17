@@ -34,6 +34,7 @@ describe('usePengajuanPenerimaStore', () => {
     const store = usePengajuanPenerimaStore()
     store.formPengajuan.nama_barang = 'Minyak'
     store.formPengajuan.jenis_barang = 'Sembako'
+    store.formPengajuan.jumlah = 5
     await store.pengajuanPost()
     expect(axios.post).toHaveBeenCalled()
     expect(alert).toHaveBeenCalled()

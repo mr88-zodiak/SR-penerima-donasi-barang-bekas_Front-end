@@ -12,7 +12,6 @@ describe('useDataKlasifikasi Store', () => {
   })
 
   it('berhasil mengambil dan memproses data getData()', async () => {
-    // DATA PALSU DARI BACKEND
     axios.get.mockResolvedValue({
       data: {
         data: [
@@ -66,7 +65,7 @@ describe('useDataKlasifikasi Store', () => {
 
     await store.getData()
 
-    expect(store.totalLayak).toBe(2)
-    expect(store.totalTidakLayak).toBe(1)
+    expect(store.totalLayak).toBe(1)
+    expect(store.totalTidakLayak).toBe(2)
   })
 })

@@ -4,7 +4,7 @@ import { jwtDecode } from 'jwt-decode'
 
 const routes = [
   {
-    path: '/DonasiKita',
+    path: '/',
     name: 'landingPage',
     meta: { title: 'Landing Page' },
     component: () => import('../views/landing_page/Home.vue'),
@@ -69,13 +69,13 @@ const routes = [
         component: () => import('../Page/Authorization.vue'),
       },
       {
-        path: 'dokumentasi',
+        path: '/admin/user/data/dokumentasi',
         name: 'dokumentasi',
         meta: { title: 'Dokumentasi', requiresAuth: true, role: 'admin' },
         component: () => import('../Page/Dokumentasi.vue'),
       },
       {
-        path: 'verifikasi-donatur',
+        path: '/admin/user/data/verifikasi-donatur',
         name: 'verifikasi pengajuan',
         meta: { title: 'Verifikasi Pengajuan', requiresAuth: true, role: 'admin' },
         component: () => import('../Page/VerifikasiPengajuan.vue'),

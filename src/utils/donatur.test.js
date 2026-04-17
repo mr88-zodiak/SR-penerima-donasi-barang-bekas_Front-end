@@ -40,6 +40,10 @@ describe('useDonatur Store', () => {
 
     expect(store.tableDataDonatur.length).toBe(1)
     expect(store.tableDataDonatur[0].nama).toBe('Budi')
+    expect(store.tableDataDonatur[0].email).toBe('budi@mail.com')
+    expect(store.tableDataDonatur[0].username).toBe('budi')
+    expect(store.tableDataDonatur[0].password).toBe('123')
+    expect(store.tableDataDonatur[0].status).toBe('approved')
   })
   it('mengambil data donatur penerima (bukan rejected)', async () => {
     axios.get.mockResolvedValue({
@@ -57,6 +61,8 @@ describe('useDonatur Store', () => {
 
     expect(store.tableDataDonaturP.length).toBe(1)
     expect(store.tableDataDonaturP[0].nama).toBe('Andi')
+    expect(store.tableDataDonaturP[0].status).toBe('approved')
+    expect(store.tableDataDonaturP[0].id).toBe(1)
   })
   it('menghitung totalData', async () => {
     axios.get.mockResolvedValue({

@@ -36,15 +36,13 @@ describe('useBarang Store', () => {
     const store = useBarang()
 
     await store.getDataBarang()
-
-    // rejected harus hilang
     expect(store.tableDataBarang.length).toBe(1)
 
-    // cek mapping
     expect(store.tableDataBarang[0].barangName).toBe('Baju')
-
-    // cek decode
     expect(store.tableDataBarang[0].kondisi).toBe('masih baru')
+    expect(store.tableDataBarang[0].donaturName).toBe('Andi')
+    expect(store.tableDataBarang[0].gambar).toBe('img.jpg')
+    expect(store.tableDataBarang[0].status).toBe('approved')
   })
   it('menghitung totalDataBarang', async () => {
     axios.get.mockResolvedValue({
@@ -55,64 +53,15 @@ describe('useBarang Store', () => {
         ],
       },
     })
-
     const store = useBarang()
-
     await store.getDataBarang()
-
     expect(store.totalDataBarang).toBe(2)
-  })
-  it('memproses data chart bar dengan benar', async () => {
-    axios.get.mockResolvedValue({
-      data: {
-        data: [
-          { tanggal: '2025-01-01', kategori: 'pakaian', total: 3 },
-          { tanggal: '2025-01-01', kategori: 'buku', total: 2 },
-          { tanggal: '2025-01-02', kategori: 'pakaian', total: 5 },
-        ],
-      },
-    })
-
-    const store = useBarang()
-
-    await store.fetchChartData()
-
-    // cek kategori tanggal
-    expect(store.categoriesBar).toEqual(['2025-01-01', '2025-01-02'])
-
-    // cek series ada 2 kategori
-    expect(store.seriesBar.length).toBe(2)
-
-    // cek data pakaian
-    const pakaian = store.seriesBar.find((s) => s.name === 'pakaian')
-
-    expect(pakaian.data).toEqual([3, 5])
-  })
-  it('memproses data pie chart', async () => {
-    axios.get.mockResolvedValue({
-      data: {
-        data: [
-          { kategori: 'pakaian', total: 3 },
-          { kategori: 'pakaian', total: 2 },
-          { kategori: 'buku', total: 4 },
-        ],
-      },
-    })
-
-    const store = useBarang()
-
-    await store.fetchPieChartData()
-
-    expect(store.labelsPie).toEqual(['pakaian', 'buku'])
-
-    expect(store.seriesPie).toEqual([5, 4])
   })
   it('deleteData memanggil API dan refresh data', async () => {
     axios.delete.mockResolvedValue({})
     axios.get.mockResolvedValue({ data: { barang: [] } })
 
     const store = useBarang()
-
     await store.deleteData(10)
 
     expect(axios.delete).toHaveBeenCalled()

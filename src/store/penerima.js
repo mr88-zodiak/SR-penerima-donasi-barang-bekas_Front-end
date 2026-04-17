@@ -229,6 +229,7 @@ export const usePenerima = defineStore('penerima', () => {
     dataRole,
     approved,
     getJumlahPenerima,
+    jumlahPenerima,
     rejected,
     tableDataPenerimaInfo,
     getDataInfoDonasi,

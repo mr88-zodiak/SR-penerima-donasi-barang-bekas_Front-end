@@ -95,7 +95,7 @@ const onPageChange = (event) => {
             <th scope="col" class="px-4 py-4">Kontak (Email/User)</th>
             <th scope="col" class="px-4 py-4">Ekonomi</th>
             <th scope="col" class="px-4 py-4">Tanggungan</th>
-            <th scope="col" class="px-4 py-4">Aset</th>
+            <th scope="col" class="px-4 py-4">Kendaraan pribadi</th>
             <th scope="col" class="px-4 py-4">Hunian</th>
             <th scope="col" class="px-4 py-4">Alamat</th>
             <th scope="col" class="px-4 py-4">Kebutuhan</th>
@@ -160,8 +160,8 @@ const onPageChange = (event) => {
               <div>In: {{ item.login_stamp }}</div>
               <div>Reg: {{ item.register }}</div>
             </td>
-
-            <td v-if="item.edit_stamp" class="px-4 py-4 text-[10px]">
+            <td v-if="item.edit_stamp" class="px-4 py-4 text-[10px]">Masih kosong</td>
+            <td v-else class="px-4 py-4 text-[10px]">
               {{ item.edit_stamp }}
             </td>
 

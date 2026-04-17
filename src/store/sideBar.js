@@ -100,7 +100,7 @@ export const useSideBars = defineStore('dataSideBars', () => {
       name: 'Dokumentasi',
       icon: PhotoIconOutline,
       iconActive: PhotoIconSolid,
-      link: '/dokumentasi',
+      link: '/admin/user/data/dokumentasi',
       active: false,
     },
     {
@@ -108,7 +108,7 @@ export const useSideBars = defineStore('dataSideBars', () => {
       name: 'Verifikasi Pengajuan',
       icon: CheckCircleIconOutline,
       iconActive: CheckCircleIconSolid,
-      link: '/verifikasi-donatur',
+      link: '/admin/user/data/verifikasi-donatur',
       active: false,
     },
   ])

@@ -51,6 +51,7 @@ export const useDataDonasi = defineStore('dataDonasi', () => {
         }))
         .filter((item) => item.status !== 'pending')
       tableData.splice(0, tableData.length, ...data)
+      console.log(tableData[0])
     } catch (e) {
       console.log(e)
     }

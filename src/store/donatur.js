@@ -7,7 +7,7 @@ export const useDonatur = defineStore('donatur', () => {
 
   const tableDataDonaturP = reactive([])
   const jumlahDonatur = ref(0)
-  console.log(jumlahDonatur)
+  // console.log(jumlahDonatur)
   const getJumlahDonatur = async () => {
     try {
       const response = await axios.get('http://localhost:5000/user/api/get/jumlah/account/donatur')
@@ -88,5 +88,6 @@ export const useDonatur = defineStore('donatur', () => {
     tableDataDonaturP,
     totalData,
     getJumlahDonatur,
+    jumlahDonatur,
   }
 })
